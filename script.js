@@ -1,119 +1,146 @@
-// Utilities
-const $ = (q) => document.querySelector(q);
-const on = (el, ev, fn) => el.addEventListener(ev, fn);
+/* state & helpers */
+const $ = (s)=>document.querySelector(s);
+const LS_KEY = 'pdfgo.mode';
+let currentMode = localStorage.getItem(LS_KEY) || 'pdf2jpg'; // 'pdf2jpg' | 'jpg2pdf'
 
-// Mode toggle with memory
-const MODE_KEY = 'pdfgo.mode'; // 'j2p' or 'p2j'
-const btnPdf2Jpg = $('#btnModePdf2Jpg');
-const btnJpg2Pdf = $('#btnModeJpg2Pdf');
-const cardJ2P = $('#cardJpg2Pdf');
-const cardP2J = $('#cardPdf2Jpg');
+/* elements */
+const btnModePdfToJpg = $('#btnModePdfToJpg');
+const btnModeJpgToPdf = $('#btnModeJpgToPdf');
+const cardTitle = $('#cardTitle');
+const cardSub = $('#cardSub');
 
-function setMode(mode){
-  localStorage.setItem(MODE_KEY, mode);
-  const j2p = mode === 'j2p';
-  btnJpg2Pdf.setAttribute('aria-selected', j2p);
-  btnPdf2Jpg.setAttribute('aria-selected', !j2p);
-  cardJ2P.hidden = !j2p;
-  cardP2J.hidden = j2p;
-}
-on(btnJpg2Pdf,'click', ()=> setMode('j2p'));
-on(btnPdf2Jpg,'click', ()=> setMode('p2j'));
-setMode(localStorage.getItem(MODE_KEY) || 'j2p');
+const panePdfToJpg = $('#panePdfToJpg');
+const paneJpgToPdf = $('#paneJpgToPdf');
 
-// JPG -> PDF
-const inpJpg = $('#inpJpg');
-const btnPickJpg = $('#btnPickJpg');
+const pdfInput = $('#pdfInput');
+const btnPickPdf = $('#btnPickPdf');
+const btnConvertPdfToJpg = $('#btnConvertPdfToJpg');
+const pdfList = $('#pdfList');
+
+const imgInput = $('#imgInput');
+const btnPickImages = $('#btnPickImages');
 const btnMakePdf = $('#btnMakePdf');
-const listJpg = $('#listJpg');
+const imgList = $('#imgList');
 
-on(btnPickJpg,'click', ()=> inpJpg.click());
-on(inpJpg,'change', () => {
-  listJpg.innerHTML = '';
-  [...inpJpg.files].forEach(f => {
+/* toggle */
+function applyMode() {
+  const pdfMode = currentMode === 'pdf2jpg';
+  btnModePdfToJpg.classList.toggle('active', pdfMode);
+  btnModeJpgToPdf.classList.toggle('active', !pdfMode);
+  panePdfToJpg.hidden = !pdfMode;
+  paneJpgToPdf.hidden = pdfMode;
+  cardTitle.textContent = pdfMode ? 'แปลง PDF → JPG' : 'แปลง JPG → PDF';
+  cardSub.textContent = pdfMode 
+    ? 'เราจะแตกหน้า PDF เป็นรูป JPG — สามารถดาวน์โหลดเป็น ZIP'
+    : 'เลือกรูปหลายไฟล์รวมเป็น PDF เดียว — ประมวลผลบนอุปกรณ์ของคุณ';
+  localStorage.setItem(LS_KEY, currentMode);
+}
+
+/* event: toggle */
+btnModePdfToJpg.addEventListener('click', ()=>{currentMode='pdf2jpg';applyMode();});
+btnModeJpgToPdf.addEventListener('click', ()=>{currentMode='jpg2pdf';applyMode();});
+
+/* PDF -> JPG */
+btnPickPdf.addEventListener('click', ()=> pdfInput.click());
+pdfInput.addEventListener('change', ()=>{
+  pdfList.innerHTML = '';
+  btnConvertPdfToJpg.disabled = !pdfInput.files?.length;
+  if (pdfInput.files?.length) {
     const li = document.createElement('li');
-    li.textContent = `${f.name} (${Math.round(f.size/1024)} KB)`;
-    listJpg.appendChild(li);
-  });
-  btnMakePdf.disabled = !inpJpg.files.length;
+    li.textContent = pdfInput.files[0].name;
+    pdfList.appendChild(li);
+  }
 });
 
-on(btnMakePdf,'click', async ()=>{
-  if(!inpJpg.files.length) return;
-  btnMakePdf.disabled = true; btnMakePdf.textContent = 'กำลังแปลง...';
-  try{
-    const { PDFDocument } = PDFLib;
-    const pdfDoc = await PDFDocument.create();
+btnConvertPdfToJpg.addEventListener('click', async ()=>{
+  const file = pdfInput.files?.[0];
+  if (!file) return;
+  btnConvertPdfToJpg.disabled = true;
+  btnConvertPdfToJpg.textContent = 'กำลังแปลง...';
+  try {
+    // read pdf
+    const arrayBuffer = await file.arrayBuffer();
+    const loadingTask = pdfjsLib.getDocument({data: arrayBuffer});
+    const pdf = await loadingTask.promise;
 
-    for (const file of inpJpg.files){
-      const bytes = await file.arrayBuffer();
-      const isPng = file.type.includes('png');
-      const img = isPng ? await pdfDoc.embedPng(bytes) : await pdfDoc.embedJpg(bytes);
-      const page = pdfDoc.addPage([img.width, img.height]);
-      page.drawImage(img, { x:0, y:0, width:img.width, height:img.height });
+    const zip = new JSZip();
+    for (let i=1; i<=pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({scale:2});
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await page.render({canvasContext: ctx, viewport}).promise;
+      const blob = await new Promise(res=>canvas.toBlob(res,'image/jpeg',0.92));
+      const buf = await blob.arrayBuffer();
+      const fname = `page-${String(i).padStart(3,'0')}.jpg`;
+      zip.file(fname, buf);
     }
-    const pdfBytes = await pdfDoc.save();
+    const zipBlob = await zip.generateAsync({type:'blob'});
+    const url = URL.createObjectURL(zipBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (file.name.replace(/\.pdf$/i,'') || 'pdf') + '-images.zip';
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch(e) {
+    alert('แปลงไม่สำเร็จ: ' + e.message);
+  } finally {
+    btnConvertPdfToJpg.textContent = 'แปลงและดาวน์โหลด JPG (ZIP)';
+    btnConvertPdfToJpg.disabled = false;
+  }
+});
+
+/* JPG -> PDF */
+btnPickImages.addEventListener('click', ()=> imgInput.click());
+imgInput.addEventListener('change', ()=>{
+  imgList.innerHTML='';
+  btnMakePdf.disabled = !(imgInput.files && imgInput.files.length);
+  if (imgInput.files?.length) {
+    [...imgInput.files].forEach(f=>{
+      const li = document.createElement('li');
+      li.textContent = f.name;
+      imgList.appendChild(li);
+    });
+  }
+});
+
+btnMakePdf.addEventListener('click', async ()=>{
+  const files = imgInput.files;
+  if (!files?.length) return;
+  btnMakePdf.disabled = true;
+  btnMakePdf.textContent = 'กำลังแปลง...';
+  try {
+    const { PDFDocument } = PDFLib;
+    const doc = await PDFDocument.create();
+    for (const f of files) {
+      const bytes = new Uint8Array(await f.arrayBuffer());
+      let img, dims;
+      if (/\.png$/i.test(f.name)) {
+        img = await doc.embedPng(bytes);
+      } else {
+        img = await doc.embedJpg(bytes);
+      }
+      dims = img.scale(1);
+      const page = doc.addPage([dims.width, dims.height]);
+      page.drawImage(img, { x:0, y:0, width:dims.width, height:dims.height });
+    }
+    const pdfBytes = await doc.save();
     const blob = new Blob([pdfBytes], {type:'application/pdf'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = 'images-to-pdf.pdf';
+    a.href = url;
+    a.download = 'images.pdf';
     a.click();
     URL.revokeObjectURL(url);
-  }catch(e){
-    alert('เกิดข้อผิดพลาดในการแปลงเป็น PDF: ' + e.message);
-  }finally{
-    btnMakePdf.disabled = false; btnMakePdf.textContent = 'แปลงเป็น PDF';
+  } catch(e) {
+    alert('แปลงไม่สำเร็จ: ' + e.message);
+  } finally {
+    btnMakePdf.textContent = 'แปลงเป็น PDF และดาวน์โหลด';
+    btnMakePdf.disabled = false;
   }
 });
 
-// PDF -> JPG (one zip)
-const inpPdf = $('#inpPdf');
-const btnPickPdf = $('#btnPickPdf');
-const btnMakeZip = $('#btnMakeZip');
-const listPdf = $('#listPdf');
-on(btnPickPdf,'click', ()=> inpPdf.click());
-on(inpPdf,'change', ()=>{
-  listPdf.innerHTML = '';
-  if(inpPdf.files[0]){
-    const f = inpPdf.files[0];
-    const li = document.createElement('li');
-    li.textContent = `${f.name} (${Math.round(f.size/1024)} KB)`;
-    listPdf.appendChild(li);
-    btnMakeZip.disabled = false;
-  }else{
-    btnMakeZip.disabled = true;
-  }
-});
-
-on(btnMakeZip,'click', async ()=>{
-  const file = inpPdf.files[0];
-  if(!file) return;
-  btnMakeZip.disabled = true; btnMakeZip.textContent='กำลังแปลง...';
-
-  try{
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    const zip = new JSZip();
-
-    for (let p=1; p<=pdf.numPages; p++){
-      const page = await pdf.getPage(p);
-      const viewport = page.getViewport({ scale:2 }); // 2x for quality
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = viewport.width; canvas.height = viewport.height;
-      await page.render({ canvasContext:ctx, viewport }).promise;
-      const blob = await new Promise(res=> canvas.toBlob(res, 'image/jpeg', 0.92));
-      const buf = await blob.arrayBuffer();
-      zip.file(`page-${String(p).padStart(2,'0')}.jpg`, buf);
-    }
-    const content = await zip.generateAsync({type:"blob"});
-    const url = URL.createObjectURL(content);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'pdf-to-jpg.zip'; a.click();
-    URL.revokeObjectURL(url);
-  }catch(e){
-    alert('แปลง PDF เป็น JPG ไม่สำเร็จ: ' + e.message);
-  }finally{
-    btnMakeZip.disabled = false; btnMakeZip.textContent='แปลงและดาวน์โหลด JPG (ZIP)';
-  }
-});
+/* init */
+applyMode();

@@ -1,94 +1,79 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PDFGo.space — แปลงไฟล์ PDF ↔ JPG ออนไลน์</title>
-  <meta name="description" content="แปลงไฟล์ PDF เป็น JPG และ JPG เป็น PDF ออนไลน์ ใช้งานง่าย รวดเร็ว ปลอดภัย ทำงานบนเบราว์เซอร์ของคุณเท่านั้น">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PDFGo.space — เครื่องมือแปลงไฟล์ PDF</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Opun อาจไม่มีบน Google Fonts: ใช้ Prompt เป็นสำรอง -->
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <!-- Third‑party libs for client conversions -->
-  <script defer src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script defer src="script.js"></script>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header class="site-header">
-    <div class="wrap">
-      <div class="brand-row">
-        <div class="logo" aria-hidden="true">
-          <!-- simple PDF mark -->
-          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="4" y="3" width="14" height="18" rx="2" ry="2" stroke="currentColor" fill="none"/>
-            <path d="M14 3v5h5" stroke="currentColor" fill="none"/>
-          </svg>
-        </div>
-        <h1 class="brand">PDFGo<span class="dot">.space</span></h1>
-      </div>
-      <p class="sub">เลือกรูป JPG/PNG แล้วแปลงเป็นไฟล์ PDF ได้ในไม่กี่วินาที — หรือแปลง PDF เป็น JPG ง่าย ๆ</p>
-
-      <!-- Mode switch pills -->
-      <div class="mode-switch" role="tablist" aria-label="เลือกรูปแบบการแปลง">
-        <button id="btnModePdf2Jpg" class="pill" role="tab" aria-selected="false">PDF → JPG</button>
-        <button id="btnModeJpg2Pdf" class="pill" role="tab" aria-selected="true">JPG → PDF</button>
-      </div>
+    <div class="brand">
+      <span class="logo" aria-hidden="true">
+        <!-- simple doc icon -->
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="2" width="14" height="20" rx="2" stroke="#C0AFE2" stroke-width="2"/>
+          <path d="M8 6h6M8 10h6M8 14h4" stroke="#C0AFE2" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="brand-text">PDFGo<span class="dot">.space</span></span>
     </div>
+    <p class="tagline">เลือกรูป JPG/PNG แล้วแปลงเป็นไฟล์ PDF ได้ในไม่กี่วินาที — หรือแปลง PDF เป็น JPG ง่าย ๆ</p>
   </header>
 
-  <main class="wrap main-area">
-    <!-- JPG to PDF -->
-    <section id="cardJpg2Pdf" class="card" aria-labelledby="h-j2p">
-      <div class="card-hd">
-        <div class="icon">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M12 16l-3-3-5 5" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="8" cy="8" r="2"/>
-            <path d="M21 15V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10" />
-            <rect x="3" y="13" width="18" height="8" rx="2" />
+  <main class="container">
+    <!-- Toggle Row -->
+    <div class="toggle-row" role="tablist" aria-label="เลือกรูปแบบการแปลง">
+      <button id="btnModePdfToJpg" class="toggle-btn active" role="tab" aria-selected="true">PDF → JPG</button>
+      <button id="btnModeJpgToPdf" class="toggle-btn" role="tab" aria-selected="false">JPG → PDF</button>
+    </div>
+
+    <!-- Card -->
+    <section class="card" id="card">
+      <div class="card-header">
+        <span class="card-icon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="18" height="14" rx="2" stroke="#C0AFE2" stroke-width="2"/>
+            <path d="M6 19h12" stroke="#C0AFE2" stroke-width="2" stroke-linecap="round"/>
           </svg>
+        </span>
+        <h1 class="card-title"><span id="cardTitle">แปลง PDF → JPG</span></h1>
+      </div>
+      <p class="card-sub" id="cardSub">เราจะแตกหน้า PDF เป็นรูป JPG — สามารถดาวน์โหลดเป็น ZIP</p>
+
+      <!-- PDF → JPG pane -->
+      <div id="panePdfToJpg" class="pane">
+        <div class="uploader">
+          <input type="file" id="pdfInput" accept="application/pdf" hidden />
+          <button class="btn primary" id="btnPickPdf">เลือกไฟล์ PDF</button>
+          <button class="btn outline" id="btnConvertPdfToJpg" disabled>แปลงและดาวน์โหลด JPG (ZIP)</button>
         </div>
-        <h2 id="h-j2p">แปลงรูป JPG/PNG → PDF</h2>
+        <ul id="pdfList" class="file-list"></ul>
       </div>
 
-      <p class="hint">รองรับหลายรูป ระบบจะรวมเป็น PDF ไฟล์เดียวให้</p>
-      <div class="uploader">
-        <input id="inpJpg" type="file" accept="image/jpeg,image/png" multiple hidden>
-        <button class="btn primary" id="btnPickJpg">เลือกไฟล์รูป</button>
-        <button class="btn" id="btnMakePdf" disabled>แปลงเป็น PDF</button>
-      </div>
-      <ul id="listJpg" class="file-list"></ul>
-    </section>
-
-    <!-- PDF to JPG -->
-    <section id="cardPdf2Jpg" class="card" aria-labelledby="h-p2j" hidden>
-      <div class="card-hd">
-        <div class="icon">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="3" y="3" width="18" height="14" rx="2"/>
-            <path d="M3 17l5-5 4 4 3-3 4 4" />
-          </svg>
+      <!-- JPG → PDF pane -->
+      <div id="paneJpgToPdf" class="pane" hidden>
+        <div class="uploader">
+          <input type="file" id="imgInput" accept="image/jpeg,image/png" multiple hidden />
+          <button class="btn primary" id="btnPickImages">เลือกรูปภาพ</button>
+          <button class="btn outline" id="btnMakePdf" disabled>แปลงเป็น PDF และดาวน์โหลด</button>
         </div>
-        <h2 id="h-p2j">แปลง PDF → JPG</h2>
+        <ul id="imgList" class="file-list"></ul>
       </div>
-
-      <p class="hint">เราจะแตกหน้า PDF เป็นรูป JPG — สามารถดาวน์โหลดเป็น ZIP</p>
-      <div class="uploader">
-        <input id="inpPdf" type="file" accept="application/pdf" hidden>
-        <button class="btn primary" id="btnPickPdf">เลือกไฟล์ PDF</button>
-        <button class="btn" id="btnMakeZip" disabled>แปลงและดาวน์โหลด JPG (ZIP)</button>
-      </div>
-      <ul id="listPdf" class="file-list"></ul>
     </section>
   </main>
 
   <footer class="site-footer">
-    <div class="wrap">
-      <p>© 2025 PDFGo.space — เครื่องมือแปลงไฟล์ PDF ออนไลน์</p>
-    </div>
+    © 2025 PDFGo.space — เครื่องมือแปลงไฟล์ PDF ออนไลน์
   </footer>
+
+  <!-- libs -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
