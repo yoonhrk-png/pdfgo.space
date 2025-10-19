@@ -85,3 +85,10 @@ body{
   .tagline{font-size:16px}
   .card-head h2{font-size:22px}
 }
+.center-stage {
+  min-height: calc(100vh - 180px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
