@@ -1,101 +1,94 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PDFGo.space — แปลงไฟล์ PDF ↔ JPG ออนไลน์</title>
-  <meta name="description" content="แปลง JPG เป็น PDF และ PDF เป็น JPG ออนไลน์ได้ฟรี ใช้งานง่าย เร็ว ไม่ต้องติดตั้งโปรแกรม" />
+  <meta name="description" content="แปลงไฟล์ PDF เป็น JPG และ JPG เป็น PDF ออนไลน์ ใช้งานง่าย รวดเร็ว ปลอดภัย ทำงานบนเบราว์เซอร์ของคุณเท่านั้น">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Opun (ถ้าโหลดไม่ได้จะ fallback ไปที่ Kanit/Prompt) -->
-  <link href="https://fonts.cdnfonts.com/css/opun" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
-  <!-- Libraries for client-side conversion -->
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.mjs" type="module"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- Opun อาจไม่มีบน Google Fonts: ใช้ Prompt เป็นสำรอง -->
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- Third‑party libs for client conversions -->
+  <script defer src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script defer src="script.js"></script>
 </head>
 <body>
-  <header class="nav">
-    <div class="container nav-inner">
-      <div class="brand">
-        <i class="ri-file-pdf-2-line"></i>
-        <span>PDFGo<span class="dot">.space</span></span>
+  <header class="site-header">
+    <div class="wrap">
+      <div class="brand-row">
+        <div class="logo" aria-hidden="true">
+          <!-- simple PDF mark -->
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="4" y="3" width="14" height="18" rx="2" ry="2" stroke="currentColor" fill="none"/>
+            <path d="M14 3v5h5" stroke="currentColor" fill="none"/>
+          </svg>
+        </div>
+        <h1 class="brand">PDFGo<span class="dot">.space</span></h1>
       </div>
-      <nav class="nav-links">
-        <a href="#jpg2pdf"><i class="ri-image-line"></i> JPG → PDF</a>
-        <a href="#pdf2jpg"><i class="ri-file-image-line"></i> PDF → JPG</a>
-        <a class="pill" href="#how"><i class="ri-heart-3-line"></i> ใช้งานฟรี</a>
-      </nav>
+      <p class="sub">เลือกรูป JPG/PNG แล้วแปลงเป็นไฟล์ PDF ได้ในไม่กี่วินาที — หรือแปลง PDF เป็น JPG ง่าย ๆ</p>
+
+      <!-- Mode switch pills -->
+      <div class="mode-switch" role="tablist" aria-label="เลือกรูปแบบการแปลง">
+        <button id="btnModePdf2Jpg" class="pill" role="tab" aria-selected="false">PDF → JPG</button>
+        <button id="btnModeJpg2Pdf" class="pill" role="tab" aria-selected="true">JPG → PDF</button>
+      </div>
     </div>
   </header>
 
-  <section class="hero">
-    <div class="container hero-inner">
-      <h1>แปลงไฟล์ <span class="accent">PDF</span> ↔ <span class="accent">JPG</span> ออนไลน์</h1>
-      <p class="tagline">ใช้งานง่าย เร็ว ปลอดภัย — ทำงานบนเบราว์เซอร์ของคุณเท่านั้น</p>
-      <div class="tabs">
-        <button id="tab-jpg2pdf" class="tab active"><i class="ri-image-add-line"></i> JPG → PDF</button>
-        <button id="tab-pdf2jpg" class="tab"><i class="ri-file-transfer-line"></i> PDF → JPG</button>
-      </div>
-    </div>
-  </section>
-
-  <main class="container">
+  <main class="wrap main-area">
     <!-- JPG to PDF -->
-    <section id="jpg2pdf" class="panel active">
-      <div class="card dropzone" data-type="images">
-        <div class="dz-icon"><i class="ri-upload-cloud-2-line"></i></div>
-        <h2>ลากรูป JPG/PNG มาวางที่นี่ หรือเลือกไฟล์</h2>
-        <p class="muted">รองรับหลายรูป เราจะรวมเป็น PDF ไฟล์เดียวให้</p>
-        <div class="actions">
-          <label class="btn">
-            <input id="jpg-input" type="file" accept="image/*" multiple hidden />
-            <i class="ri-folder-open-line"></i> เลือกไฟล์รูป
-          </label>
-          <button id="convert-jpg" class="btn primary" disabled>
-            <i class="ri-arrow-right-line"></i> แปลงเป็น PDF
-          </button>
+    <section id="cardJpg2Pdf" class="card" aria-labelledby="h-j2p">
+      <div class="card-hd">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 16l-3-3-5 5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="8" cy="8" r="2"/>
+            <path d="M21 15V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10" />
+            <rect x="3" y="13" width="18" height="8" rx="2" />
+          </svg>
         </div>
-        <div id="jpg-list" class="filelist"></div>
+        <h2 id="h-j2p">แปลงรูป JPG/PNG → PDF</h2>
       </div>
+
+      <p class="hint">รองรับหลายรูป ระบบจะรวมเป็น PDF ไฟล์เดียวให้</p>
+      <div class="uploader">
+        <input id="inpJpg" type="file" accept="image/jpeg,image/png" multiple hidden>
+        <button class="btn primary" id="btnPickJpg">เลือกไฟล์รูป</button>
+        <button class="btn" id="btnMakePdf" disabled>แปลงเป็น PDF</button>
+      </div>
+      <ul id="listJpg" class="file-list"></ul>
     </section>
 
     <!-- PDF to JPG -->
-    <section id="pdf2jpg" class="panel">
-      <div class="card dropzone" data-type="pdf">
-        <div class="dz-icon"><i class="ri-file-image-line"></i></div>
-        <h2>ลากไฟล์ PDF มาวางที่นี่ หรือเลือกไฟล์</h2>
-        <p class="muted">เราจะแยกหน้า PDF เป็นรูป JPG — สามารถดาวน์โหลดเป็น ZIP</p>
-        <div class="actions">
-          <label class="btn">
-            <input id="pdf-input" type="file" accept="application/pdf" hidden />
-            <i class="ri-folder-open-line"></i> เลือกไฟล์ PDF
-          </label>
-          <button id="convert-pdf" class="btn primary" disabled>
-            <i class="ri-download-2-line"></i> แปลงและดาวน์โหลด JPG (ZIP)
-          </button>
+    <section id="cardPdf2Jpg" class="card" aria-labelledby="h-p2j" hidden>
+      <div class="card-hd">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="14" rx="2"/>
+            <path d="M3 17l5-5 4 4 3-3 4 4" />
+          </svg>
         </div>
-        <div id="pdf-pages" class="preview-grid"></div>
+        <h2 id="h-p2j">แปลง PDF → JPG</h2>
       </div>
-    </section>
 
-    <section id="how" class="how card">
-      <h3><i class="ri-sparkling-2-line"></i> ทำไมต้อง PDFGo.space?</h3>
-      <ul>
-        <li><i class="ri-shield-check-line"></i> ความเป็นส่วนตัว: ทุกอย่างประมวลผลบนเครื่องคุณ (Client‑side)</li>
-        <li><i class="ri-flashlight-line"></i> เร็วและใช้งานง่าย: ลากวางได้ทันที</li>
-        <li><i class="ri-heart-3-line"></i> ฟรีและไม่มีลายน้ำ</li>
-      </ul>
+      <p class="hint">เราจะแตกหน้า PDF เป็นรูป JPG — สามารถดาวน์โหลดเป็น ZIP</p>
+      <div class="uploader">
+        <input id="inpPdf" type="file" accept="application/pdf" hidden>
+        <button class="btn primary" id="btnPickPdf">เลือกไฟล์ PDF</button>
+        <button class="btn" id="btnMakeZip" disabled>แปลงและดาวน์โหลด JPG (ZIP)</button>
+      </div>
+      <ul id="listPdf" class="file-list"></ul>
     </section>
   </main>
 
-  <footer class="footer">
-    © 2025 PDFGo.space — เครื่องมือแปลงไฟล์ PDF ออนไลน์
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© 2025 PDFGo.space — เครื่องมือแปลงไฟล์ PDF ออนไลน์</p>
+    </div>
   </footer>
-
-  <script type="module" src="script.js"></script>
 </body>
 </html>
