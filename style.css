@@ -1,0 +1,32 @@
+:root{
+  --bg:#0c0a12;--card:#131125;--muted:#b7b3c9;--txt:#ffffff;
+  --accent:#8a5cff;--accent-2:#a987ff;--ok:#39d98a;--err:#ff6b6b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);font:16px/1.55 "Inter",-apple-system,Segoe UI,Roboto,Arial;}
+a{color:var(--accent)}
+.wrap{max-width:1080px;margin:auto;padding:16px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-weight:900;letter-spacing:.5px;text-decoration:none;font-size:22px}
+.brand span{color:var(--accent)}.brand small{opacity:.6;font-size:.8em;margin-left:6px}
+nav{display:flex;gap:8px;flex-wrap:wrap}
+.pill{padding:8px 12px;border-radius:999px;background:transparent;border:1px solid #2a2647;color:#ddd;text-decoration:none}
+.pill.active,.pill:hover{background:#1a1633;border-color:#3b3266}
+.card{background:linear-gradient(180deg,#15122a,#0f0d1f);border:1px solid #2a2647;border-radius:16px;padding:18px;margin:14px 0}
+.tool h1{margin-top:0}.sub{color:var(--muted);margin-top:-6px}.info{border-style:dashed}
+.drop{display:block;border:2px dashed #3b3266;border-radius:16px;padding:22px;margin-top:12px;cursor:pointer;background:#121024}
+.drop input{display:none}.drop-ui{display:flex;align-items:center;gap:14px}
+.big-icon{font-size:34px}.muted{color:var(--muted);font-size:.95em}
+.actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.btn{background:var(--accent);border:none;color:#fff;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer}
+.btn:disabled{opacity:.55;cursor:not-allowed}.btn.ghost{background:transparent;border:1px solid #3b3266;color:#ddd}
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}.inline{display:flex;align-items:center;gap:8px}
+.progress{position:relative;height:8px;background:#1a1633;border-radius:999px;margin-top:14px;overflow:hidden}
+.progress.hide{display:none}.progress .bar{position:absolute;inset:0 100% 0 0;background:linear-gradient(90deg,var(--accent),var(--accent-2));animation:load 1.2s infinite}
+.progress .txt{display:block;margin-top:8px;color:var(--muted)}
+@keyframes load{0%{inset:0 100% 0 0}50%{inset:0 0 0 0}100%{inset:0 100% 0 0}}
+.preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:12px}
+.preview-grid .thumb{background:#0f0c1d;border:1px solid #29254a;border-radius:12px;overflow:hidden}
+.preview-grid img,.preview-grid canvas{display:block;width:100%;height:auto}
+.footer{opacity:.7;margin:24px 0 32px}
+.tool{display:none}.tool.active{display:block}

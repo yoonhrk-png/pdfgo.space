@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PDFGO — แปลง PDF ↔ JPG ฟรี</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <header class="wrap">
+    <a class="brand" href="./">PDF<span>GO</span><small>.space</small></a>
+    <nav>
+      <a href="#pdf2jpg" class="pill active">PDF → JPG</a>
+      <a href="#jpg2pdf" class="pill">JPG → PDF</a>
+      <a href="https://pdfgo.space" class="pill ghost" target="_blank" rel="noopener">หน้าแรก</a>
+    </nav>
+  </header>
+  <main class="wrap">
+    <section id="pdf2jpg" class="card tool active">
+      <h1>แปลง <strong>PDF → JPG</strong></h1>
+      <p class="sub">เลือกไฟล์ PDF ของคุณ แล้วระบบจะแปลงทุกหน้าเป็นรูป JPG (ดาวน์โหลดเป็น .zip)</p>
+      <label class="drop">
+      <input id="pdf-input" type="file" accept="application/pdf" />
+        <div class="drop-ui">
+          <div class="big-icon">📄</div>
+          <div>
+            <b>แตะเพื่ออัปโหลด PDF</b>
+            <div class="muted">หรือวางไฟล์ลงที่นี่ (ลาก-วาง)</div>
+          </div>
+        </div>
+      </label>
+      <div class="actions">
+        <button id="btn-pdf2jpg" class="btn" disabled>แปลงไฟล์</button>
+        <button id="btn-reset-pdf" class="btn ghost" disabled>ล้าง</button>
+      </div>
+      <div id="pdf-progress" class="progress hide">
+        <div class="bar"></div><span class="txt">กำลังแปลง...</span>
+      </div>
+      <div id="pdf-preview" class="preview-grid"></div>
+    </section>
+    <section id="jpg2pdf" class="card tool">
+      <h1>แปลง <strong>JPG → PDF</strong></h1>
+      <p class="sub">เลือกภาพ JPG/PNG หลายไฟล์ เรียงหน้าได้ แล้วรวมเป็นไฟล์ PDF เดียว</p>
+      <label class="drop">
+        <input id="img-input" type="file" accept="image/jpeg,image/png" multiple />
+        <div class="drop-ui">
+          <div class="big-icon">🖼️</div>
+          <div>
+            <b>แตะเพื่ออัปโหลดรูปภาพ</b>
+            <div class="muted">เลือกได้หลายรูป (จะเรียงตามชื่อไฟล์)</div>
+          </div>
+        </div>
+      </label>
+      <div class="row">
+        <label class="inline">
+          ขนาดกระดาษ:
+          <select id="paper">
+            <option value="a4">A4 (แนวตั้ง)</option>
+            <option value="letter">US Letter</option>
+          </select>
+        </label>
+        <label class="inline">
+          ขอบกระดาษ:
+          <input id="margin" type="number" value="10" min="0" max="50" /> mm
+        </label>
+      </div>
+      <div class="actions">
+        <button id="btn-jpg2pdf" class="btn" disabled>สร้าง PDF</button>
+        <button id="btn-reset-img" class="btn ghost" disabled>ล้าง</button>
+      </div>
+      <div id="img-progress" class="progress hide">
+        <div class="bar"></div><span class="txt">กำลังรวมหน้า...</span>
+      </div>
+      <div id="img-preview" class="preview-grid"></div>
+    </section>
+    <section class="card info">
+      <h2>หมายเหตุความเป็นส่วนตัว</h2>
+      <p>ไฟล์ทั้งหมดประมวลผลในเบราว์เซอร์ของคุณเท่านั้น — <b>เราไม่อัปโหลดไฟล์ขึ้นเซิร์ฟเวอร์</b>.</p>
+    </section>
+  </main>
+  <footer class="wrap footer">
+    © 2025 <b>PDFGO</b>.space — เครื่องมือแปลงไฟล์ฟรี สีม่วงสวย ใช้งานง่าย 💜
+  </footer>
+  <script src="script.js"></script>
+</body>
+</html>
