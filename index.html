@@ -32,14 +32,14 @@
   </header>
 
   <main class="main container">
-    <!-- สวิทช์โหมด -->
+    <!-- โหมด -->
     <div class="mode-switch" role="tablist" aria-label="เลือกเครื่องมือ">
       <button id="btnModePdf2Jpg" class="chip active" role="tab" aria-selected="true">PDF → JPG</button>
       <button id="btnModeJpg2Pdf" class="chip" role="tab" aria-selected="false">JPG → PDF</button>
     </div>
 
     <div class="center-stage">
-      <!-- PDF → JPG -->
+      <!-- ===== PDF → JPG ===== -->
       <section class="card" id="cardPdf2Jpg">
         <div class="card-head">
           <svg width="24" height="24" viewBox="0 0 24 24" class="head-icon" aria-hidden="true">
@@ -58,6 +58,7 @@
         </div>
         <div id="pdf2jpgStatus" class="status"></div>
       </section>
+
       <section class="card hidden" id="panelProgressPdf" aria-live="polite">
         <div class="progress-hero">
           <div class="pdf-face" aria-hidden="true">PDF</div>
@@ -68,6 +69,7 @@
         </div>
         <div class="progress-bar"><div class="bar" id="barPdf"></div></div>
       </section>
+
       <section class="card hidden" id="panelResultPdf">
         <div class="card-head small-gap"><h2>ผลการแปลง — ดาวน์โหลดได้เลย</h2></div>
         <div class="result-actions">
@@ -77,7 +79,7 @@
         <div id="thumbList" class="thumb-list" aria-live="polite"></div>
       </section>
 
-      <!-- JPG → PDF -->
+      <!-- ===== JPG → PDF ===== -->
       <section class="card hidden" id="cardJpg2Pdf">
         <div class="card-head">
           <svg width="24" height="24" viewBox="0 0 24 24" class="head-icon" aria-hidden="true">
@@ -96,6 +98,7 @@
         </div>
         <div id="jpg2pdfStatus" class="status"></div>
       </section>
+
       <section class="card hidden" id="panelProgressImg" aria-live="polite">
         <div class="progress-hero">
           <div class="pdf-face" aria-hidden="true">IMG</div>
@@ -106,6 +109,7 @@
         </div>
         <div class="progress-bar"><div class="bar" id="barImg"></div></div>
       </section>
+
       <section class="card hidden" id="panelResultImg">
         <div class="card-head small-gap"><h2>ไฟล์ PDF พร้อมดาวน์โหลด</h2></div>
         <div class="result-actions">
@@ -114,6 +118,7 @@
         </div>
         <div class="status" id="jpg2pdfResultNote"></div>
       </section>
+
     </div>
   </main>
 
