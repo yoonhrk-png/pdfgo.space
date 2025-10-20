@@ -4,7 +4,13 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;font-family:'Prompt',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:var(--text);background:var(--bg)}
+body {
+  margin:0;
+  font-family:'Prompt',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  color:var(--text);
+  background:var(--bg);
+  padding-bottom:70px; /* เพิ่มบรรทัดนี้ */
+}
 .container{max-width:980px;margin:0 auto;padding:0 18px}
 .site-header{padding:28px 0 8px}
 .brand{display:flex;align-items:center;gap:10px}
@@ -50,7 +56,19 @@ body{margin:0;font-family:'Prompt',system-ui,-apple-system,'Segoe UI',Roboto,Ari
 .thumb img{width:100%;height:auto;border-radius:8px;display:block}
 .thumb .meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
 .thumb .meta small{color:var(--muted)}
-.site-footer{margin-top:40px;padding:18px 0;border-top:1px solid var(--stroke);background:#fff}
-.site-footer .container{padding:18px 0;text-align:center}
-.site-footer small{color:#6b7280}
+.site-footer {
+  position: fixed;           /* ให้อยู่ติดขอบล่างของจอ */
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  border-top: 1px solid var(--stroke);
+  background: #fff;
+  padding: 18px 0;
+  text-align: center;
+  z-index: 100;              /* กันโดนบล็อกอื่นบัง */
+}
+
+.site-footer small {
+  color: #6b7280;
+}
 @media (max-width:640px){.brand-name{font-size:24px}.tagline{font-size:15px}}
