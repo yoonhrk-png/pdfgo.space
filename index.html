@@ -1,131 +1,26 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PDFGo.space — PDF ↔ JPG</title>
-  <meta name="description" content="แปลง PDF เป็น JPG และ JPG/PNG เป็น PDF ออนไลน์ ใช้งานง่าย ปลอดภัย">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDFGo.space</title>
   <link rel="stylesheet" href="style.css" />
-
-  <!-- libs -->
-  <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
-  <script>pdfjsLib.GlobalWorkerOptions.workerSrc='https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';</script>
-  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-  <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 </head>
 <body>
   <header class="site-header">
-    <div class="container">
-      <div class="brand">
-        <svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <rect x="3" y="3" width="8" height="12" rx="1.8" />
-          <rect x="13" y="9" width="8" height="12" rx="1.8" />
-        </svg>
-        <h1 class="brand-name">PDFGo<span class="dot">.</span>space</h1>
-      </div>
-      <p class="tagline">เลือกรูป JPG/PNG แล้วแปลงเป็นไฟล์ PDF ได้ในไม่กี่วินาที — หรือแปลง PDF เป็น JPG ง่าย ๆ</p>
-    </div>
+    <h1>PDFGo.space</h1>
   </header>
 
   <main class="main container">
-    <!-- โหมด -->
-    <div class="mode-switch" role="tablist" aria-label="เลือกเครื่องมือ">
-      <button id="btnModePdf2Jpg" class="chip active" role="tab" aria-selected="true">PDF → JPG</button>
-      <button id="btnModeJpg2Pdf" class="chip" role="tab" aria-selected="false">JPG → PDF</button>
-    </div>
-
-    <div class="center-stage">
-      <!-- ===== PDF → JPG ===== -->
-      <section class="card" id="cardPdf2Jpg">
-        <div class="card-head">
-          <svg width="24" height="24" viewBox="0 0 24 24" class="head-icon" aria-hidden="true">
-            <rect x="3" y="3" width="8" height="12" rx="1.8" />
-            <rect x="13" y="9" width="8" height="12" rx="1.8" />
-          </svg>
-          <h2><strong>แปลง</strong> PDF → <strong>JPG</strong></h2>
-        </div>
-        <p class="sub">แปลง PDF เป็นรูป JPG — สามารถดาวน์โหลดเป็น ZIP</p>
-        <div class="actions">
-          <label class="btn primary">
-            <input id="pdfInput" type="file" accept="application/pdf" hidden />
-            เลือกไฟล์ PDF
-          </label>
-          <button id="btnPdf2Jpg" class="btn ghost" disabled>แปลงและดาวน์โหลด JPG (ZIP)</button>
-        </div>
-        <div id="pdf2jpgStatus" class="status"></div>
-      </section>
-
-      <section class="card hidden" id="panelProgressPdf" aria-live="polite">
-        <div class="progress-hero">
-          <div class="pdf-face" aria-hidden="true">PDF</div>
-          <div class="progress-text">
-            <h3>กำลังแปลงเป็น Image…</h3>
-            <p id="progressDescPdf">เตรียมเริ่มแปลงไฟล์</p>
-          </div>
-        </div>
-        <div class="progress-bar"><div class="bar" id="barPdf"></div></div>
-      </section>
-
-      <section class="card hidden" id="panelResultPdf">
-        <div class="card-head small-gap"><h2>ผลการแปลง — ดาวน์โหลดได้เลย</h2></div>
-        <div class="result-actions">
-          <button id="btnDownloadZip" class="btn primary" disabled>ดาวน์โหลดทั้งหมด (ZIP)</button>
-          <button id="btnStartOver" class="btn">เริ่มใหม่</button>
-        </div>
-        <div id="thumbList" class="thumb-list" aria-live="polite"></div>
-      </section>
-
-      <!-- ===== JPG → PDF ===== -->
-      <section class="card hidden" id="cardJpg2Pdf">
-        <div class="card-head">
-          <svg width="24" height="24" viewBox="0 0 24 24" class="head-icon" aria-hidden="true">
-            <rect x="2.5" y="2.5" width="19" height="19" rx="2.5" />
-            <path d="M7 9h10M7 12h10M7 15h6" />
-          </svg>
-          <h2><strong>แปลง</strong> JPG/PNG → <strong>PDF</strong></h2>
-        </div>
-        <p class="sub">เลือกรูปหลายไฟล์ JPG/PNG แล้วรวมเป็น PDF</p>
-        <div class="actions">
-          <label class="btn primary">
-            <input id="imgInput" type="file" accept="image/png,image/jpeg" multiple hidden />
-            เลือกรูป JPG/PNG
-          </label>
-          <button id="btnJpg2Pdf" class="btn ghost" disabled>แปลงและดาวน์โหลด PDF</button>
-        </div>
-        <div id="jpg2pdfStatus" class="status"></div>
-      </section>
-
-      <section class="card hidden" id="panelProgressImg" aria-live="polite">
-        <div class="progress-hero">
-          <div class="pdf-face" aria-hidden="true">IMG</div>
-          <div class="progress-text">
-            <h3>กำลังรวมภาพเป็น PDF…</h3>
-            <p id="progressDescImg">เตรียมเริ่ม…</p>
-          </div>
-        </div>
-        <div class="progress-bar"><div class="bar" id="barImg"></div></div>
-      </section>
-
-      <section class="card hidden" id="panelResultImg">
-        <div class="card-head small-gap"><h2>ไฟล์ PDF พร้อมดาวน์โหลด</h2></div>
-        <div class="result-actions">
-          <a id="btnDownloadPdf" class="btn primary" download="images-to.pdf">ดาวน์โหลด PDF</a>
-          <button id="btnStartOverImg" class="btn">เริ่มใหม่</button>
-        </div>
-        <div class="status" id="jpg2pdfResultNote"></div>
-      </section>
-
-    </div>
+    <section class="card">
+      <h2>แปลงไฟล์ PDF ↔ JPG</h2>
+      <p>เลือกรูป JPG/PNG แล้วแปลงเป็น PDF หรือแปลง PDF เป็น JPG ได้ง่าย ๆ</p>
+      <button>เลือกไฟล์</button>
+    </section>
   </main>
 
   <footer class="site-footer">
-    <div class="container">
-      <small>© 2025 <strong>PDFGo.space</strong> — เครื่องมือแปลงไฟล์ PDF ออนไลน์</small>
-    </div>
+    <small>© 2025 PDFGo.space — เครื่องมือแปลงไฟล์ PDF ออนไลน์</small>
   </footer>
 
   <script src="script.js"></script>
