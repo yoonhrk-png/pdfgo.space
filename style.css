@@ -48,15 +48,18 @@ body{margin:0;font-family:'Prompt',system-ui,-apple-system,'Segoe UI',Roboto,Ari
 .site-footer small{color:#6b7280}
 @media (max-width:640px){.brand-name{font-size:24px}.tagline{font-size:15px}}
 
-/* === Fix only the footer to bottom (no other changes) === */
+/* === แก้เฉพาะ footer ให้ชิดขอบล่างจริง ไม่ลอย === */
 .site-footer {
   position: fixed !important;
   bottom: 0;
   left: 0;
+  right: 0;
   width: 100%;
   background: #fff;
   border-top: 1px solid var(--stroke);
   text-align: center;
-  padding: 18px 0;
+  padding: 16px 0;
+  line-height: 1.5;
+  margin: 0;
   z-index: 100;
 }
