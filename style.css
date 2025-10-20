@@ -16,7 +16,14 @@ body{margin:0;font-family:'Prompt',system-ui,-apple-system,'Segoe UI',Roboto,Ari
 .mode-switch{display:flex;gap:14px;justify-content:center;margin:10px 0 20px}
 .chip{padding:10px 16px;border-radius:999px;border:1px solid #ece9ff;background:#f6f4ff;color:#2b2b2b;cursor:pointer}
 .chip.active{background:var(--purple);color:#fff;border-color:transparent}
-.center-stage { min-height: unset;  margin-top: 12px; display: flex; flex-direction: column;  align-items: center;  justify-content: flex-start;}
+.center-stage {
+  min-height: unset;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
 .card{width:100%;background:var(--card);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--shadow);padding:22px}
 .card.hidden{display:none}
 .card + .card{margin-top:22px}
