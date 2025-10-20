@@ -1,106 +1,130 @@
-// Mode switch
-const btnModePdf2Jpg = document.getElementById('btnModePdf2Jpg');
-const btnModeJpg2Pdf = document.getElementById('btnModeJpg2Pdf');
-const cardPdf2Jpg = document.getElementById('cardPdf2Jpg');
-const cardJpg2Pdf = document.getElementById('cardJpg2Pdf');
+// ====== UI helpers ======
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
+const show = (el) => el.classList.remove('hidden');
+const hide = (el) => el.classList.add('hidden');
+const setText = (el, txt) => { el.textContent = txt; };
 
-btnModePdf2Jpg.addEventListener('click', () => {
-  btnModePdf2Jpg.classList.add('active');
-  btnModeJpg2Pdf.classList.remove('active');
-  cardPdf2Jpg.classList.remove('hidden');
-  cardJpg2Pdf.classList.add('hidden');
+const inp = $('#pdfInput');
+const btnZip = $('#btnPdf2Jpg');
+const statusEl = $('#pdf2jpgStatus');
+
+const progressPanel = $('#panelProgress');
+const progressDesc = $('#progressDesc');
+const bar = $('#bar');
+
+const resultPanel = $('#panelResult');
+const thumbList = $('#thumbList');
+const downloadAllBtn = $('#btnDownloadZip');
+const startOverBtn = $('#btnStartOver');
+
+let lastPdf = null;
+let lastImages = [];
+let lastZip = null;
+
+// mode switch (JPG→PDF ยังไม่เปิดใช้)
+$('#btnModePdf2Jpg').addEventListener('click', () => {});
+
+inp.addEventListener('change', () => {
+  if (inp.files && inp.files[0]) {
+    lastPdf = inp.files[0];
+    setText(statusEl, `เลือกไฟล์แล้ว: ${lastPdf.name} (${Math.round(lastPdf.size/1024/1024*100)/100} MB)`);
+    btnZip.disabled = false;
+  } else {
+    setText(statusEl, '');
+    btnZip.disabled = true;
+  }
 });
 
-btnModeJpg2Pdf.addEventListener('click', () => {
-  btnModeJpg2Pdf.classList.add('active');
-  btnModePdf2Jpg.classList.remove('active');
-  cardJpg2Pdf.classList.remove('hidden');
-  cardPdf2Jpg.classList.add('hidden');
-});
+btnZip.addEventListener('click', async () => {
+  if (!lastPdf) return;
+  // เตรียม UI
+  hide($('#cardPdf2Jpg'));
+  show(progressPanel);
+  setText(progressDesc, 'กำลังโหลดไฟล์ PDF…');
+  bar.style.width = '5%';
 
-// PDF -> JPG
-const pdfInput = document.getElementById('pdfInput');
-const btnPdf2Jpg = document.getElementById('btnPdf2Jpg');
-const pdf2jpgStatus = document.getElementById('pdf2jpgStatus');
-
-pdfInput.addEventListener('change', () => {
-  btnPdf2Jpg.disabled = !pdfInput.files?.length;
-  pdf2jpgStatus.textContent = pdfInput.files?.length ? `เลือกไฟล์แล้ว: ${pdfInput.files[0].name}` : '';
-});
-
-btnPdf2Jpg.addEventListener('click', async () => {
-  if (!pdfInput.files?.length) return;
-  const file = pdfInput.files[0];
   try {
-    pdf2jpgStatus.textContent = 'กำลังอ่านไฟล์ PDF และเรนเดอร์หน้าเป็นภาพ...';
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    const zip = new JSZip();
+    const buf = await lastPdf.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    const total = pdf.numPages;
 
-    for (let i=1; i<=pdf.numPages; i++) {
+    // ZIP เตรียมไว้
+    lastZip = new JSZip();
+    const folder = lastZip.folder('images');
+    lastImages = [];
+    thumbList.innerHTML = '';
+    downloadAllBtn.disabled = true;
+
+    for (let i = 1; i <= total; i++) {
+      setText(progressDesc, `กำลังแปลงหน้า ${i} / ${total}`);
       const page = await pdf.getPage(i);
-      const viewport = page.getViewport({ scale: 2.0 }); // คมชัด
+      const viewport = page.getViewport({ scale: 2.0 }); // คุณภาพดี
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       canvas.width = viewport.width;
       canvas.height = viewport.height;
       await page.render({ canvasContext: ctx, viewport }).promise;
-      const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.92));
-      const buf = await blob.arrayBuffer();
-      zip.file(`page-${String(i).padStart(3,'0')}.jpg`, buf);
-      pdf2jpgStatus.textContent = `เรนเดอร์หน้า ${i}/${pdf.numPages} ...`;
+
+      const blob = await new Promise((res) => canvas.toBlob(res, 'image/jpeg', 0.92));
+      lastImages.push(blob);
+      folder.file(`page-${i}.jpg`, blob);
+
+      // แสดงรายการดาวน์โหลดรายหน้า
+      const url = URL.createObjectURL(blob);
+      const card = document.createElement('div');
+      card.className = 'thumb';
+      card.innerHTML = `
+        <img src="${url}" alt="หน้าที่ ${i}" loading="lazy" />
+        <div class="meta">
+          <small>หน้า ${i}</small>
+          <button class="btn" data-url="${url}" download="page-${i}.jpg">ดาวน์โหลด</button>
+        </div>`;
+      thumbList.appendChild(card);
+
+      const pct = Math.round((i/total)*100);
+      bar.style.width = pct + '%';
     }
 
-    const content = await zip.generateAsync({ type:'blob' });
-    saveAs(content, file.name.replace(/\.pdf$/i,'') + '_jpg_pages.zip');
-    pdf2jpgStatus.textContent = 'สำเร็จ! ดาวน์โหลดไฟล์ ZIP แล้ว';
+    setText(progressDesc, 'สร้าง ZIP สำหรับดาวน์โหลด…');
+    bar.style.width = '100%';
+
+    // พร้อมแสดงผลลัพธ์
+    hide(progressPanel);
+    show(resultPanel);
+    downloadAllBtn.disabled = false;
   } catch (err) {
     console.error(err);
-    pdf2jpgStatus.textContent = 'เกิดข้อผิดพลาดในการแปลงไฟล์ PDF → JPG';
+    alert('แปลงไฟล์ไม่สำเร็จ: ' + err.message);
+    // กลับหน้าแรก
+    hide(progressPanel);
+    show($('#cardPdf2Jpg'));
   }
 });
 
-// JPG -> PDF
-const imgInput = document.getElementById('imgInput');
-const btnJpg2Pdf = document.getElementById('btnJpg2Pdf');
-const jpg2pdfStatus = document.getElementById('jpg2pdfStatus');
-
-imgInput.addEventListener('change', () => {
-  btnJpg2Pdf.disabled = !imgInput.files?.length;
-  jpg2pdfStatus.textContent = imgInput.files?.length ? `เลือกรูปแล้ว: ${imgInput.files.length} ไฟล์` : '';
+// ดาวน์โหลดรายหน้า
+thumbList.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-url]');
+  if (!btn) return;
+  const url = btn.getAttribute('data-url');
+  // ใช้ชื่อจาก data-url
+  saveAs(url, btn.getAttribute('download') || 'page.jpg');
 });
 
-btnJpg2Pdf.addEventListener('click', async () => {
-  const files = Array.from(imgInput.files || []);
-  if (!files.length) return;
-  try {
-    jpg2pdfStatus.textContent = 'กำลังรวมรูปเป็น PDF ...';
-    const pdfDoc = await PDFLib.PDFDocument.create();
+// ดาวน์โหลดทั้งหมด ZIP
+downloadAllBtn.addEventListener('click', async () => {
+  if (!lastZip) return;
+  const blob = await lastZip.generateAsync({ type: 'blob' });
+  saveAs(blob, (lastPdf?.name?.replace(/\.pdf$/i,'') || 'pdf') + '-images.zip');
+});
 
-    // เรียงตามชื่อไฟล์
-    files.sort((a,b)=> a.name.localeCompare(b.name, undefined, {numeric:true, sensitivity:'base'}));
-
-    for (let i=0;i<files.length;i++) {
-      const f = files[i];
-      const bytes = new Uint8Array(await f.arrayBuffer());
-      let img, dims;
-      if (f.type === 'image/png') {
-        img = await pdfDoc.embedPng(bytes);
-      } else {
-        img = await pdfDoc.embedJpg(bytes);
-      }
-      dims = img.scale(1);
-
-      const page = pdfDoc.addPage([dims.width, dims.height]);
-      page.drawImage(img, { x:0, y:0, width:dims.width, height:dims.height });
-      jpg2pdfStatus.textContent = `เพิ่มรูป ${i+1}/${files.length} ...`;
-    }
-
-    const pdfBytes = await pdfDoc.save();
-    saveAs(new Blob([pdfBytes], {type:'application/pdf'}), 'merged_images.pdf');
-    jpg2pdfStatus.textContent = 'สำเร็จ! ดาวน์โหลด PDF แล้ว';
-  } catch (err) {
-    console.error(err);
-    jpg2pdfStatus.textContent = 'เกิดข้อผิดพลาดในการแปลง JPG → PDF';
-  }
+// เริ่มใหม่
+startOverBtn.addEventListener('click', () => {
+  lastPdf = null; lastImages = []; lastZip = null;
+  inp.value = '';
+  thumbList.innerHTML = '';
+  setText(statusEl, '');
+  btnZip.disabled = true;
+  hide(resultPanel);
+  show($('#cardPdf2Jpg'));
 });

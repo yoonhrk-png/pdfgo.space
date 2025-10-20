@@ -3,73 +3,83 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PDFGo.space — แปลงไฟล์ PDF ↔ JPG ออนไลน์</title>
-  <meta name="description" content="เลือก JPG/PNG แล้วแปลงเป็น PDF ได้ในไม่กี่วินาที หรือแตกหน้า PDF เป็น JPG ดาวน์โหลดเป็น ZIP — ทำงานบนเบราว์เซอร์ ปลอดภัย ไม่อัปโหลดไฟล์" />
+  <title>PDFGo.space — PDF → JPG</title>
+  <meta name="description" content="แปลง PDF เป็น JPG และ JPG/PNG เป็น PDF ออนไลน์ ใช้งานง่าย ปลอดภัย">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
+
+  <!-- libs for PDF rendering + ZIP download -->
+  <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 </head>
 <body>
   <header class="site-header">
     <div class="container">
       <div class="brand">
-        <svg class="brand-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="3" y="2" width="14" height="18" rx="2" ry="2" stroke="#7A5AF8" stroke-width="1.6"/>
-          <path d="M17 6l4 4-4-4z" fill="#C0AFE2"/>
-          <path d="M17 6v4h4" stroke="#C0AFE2" stroke-width="1.6" fill="none" />
-        </svg>
-        <h1 class="brand-name">PDFGo<span class="dot">.space</span></h1>
+        <svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="12" rx="1.8" /><rect x="13" y="9" width="8" height="12" rx="1.8" /></svg>
+        <h1 class="brand-name">PDFGo<span class="dot">.</span>space</h1>
       </div>
       <p class="tagline">เลือกรูป JPG/PNG แล้วแปลงเป็นไฟล์ PDF ได้ในไม่กี่วินาที — หรือแปลง PDF เป็น JPG ง่าย ๆ</p>
     </div>
   </header>
 
   <main class="main container">
-    <!-- Mode switcher -->
-    <div class="mode-switch">
-      <button id="btnModePdf2Jpg" class="chip active">PDF → JPG</button>
-      <button id="btnModeJpg2Pdf" class="chip">JPG → PDF</button>
+    <!-- สวิทช์โหมด -->
+    <div class="mode-switch" role="tablist" aria-label="เลือกเครื่องมือ">
+      <button id="btnModePdf2Jpg" class="chip active" role="tab" aria-selected="true">PDF → JPG</button>
+      <button id="btnModeJpg2Pdf" class="chip" role="tab" aria-selected="false" disabled>JPG → PDF</button>
     </div>
 
-    <!-- Card -->
-    <section class="card" id="cardPdf2Jpg">
-      <div class="card-head">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" class="head-icon">
-          <rect x="3" y="3" width="8" height="12" rx="1.8" stroke="#7A5AF8" stroke-width="1.6"/>
-          <rect x="13" y="9" width="8" height="12" rx="1.8" stroke="#7A5AF8" stroke-width="1.6"/>
-        </svg>
-        <h2>แปลง <strong>PDF</strong> → <strong>JPG</strong></h2>
-      </div>
-      <p class="sub">เราจะแตกหน้า PDF เป็นรูป JPG — สามารถดาวน์โหลดเป็น ZIP</p>
-      <div class="actions">
-        <label class="btn primary">
-          <input id="pdfInput" type="file" accept="application/pdf" hidden />
-          เลือกไฟล์ PDF
-        </label>
-        <button id="btnPdf2Jpg" class="btn ghost" disabled>แปลงและดาวน์โหลด JPG (ZIP)</button>
-      </div>
-      <div id="pdf2jpgStatus" class="status"></div>
-    </section>
+    <div class="center-stage">
+      <!-- การ์ด: PDF → JPG -->
+      <section class="card" id="cardPdf2Jpg">
+        <div class="card-head">
+          <svg width="24" height="24" viewBox="0 0 24 24" class="head-icon" aria-hidden="true">
+            <rect x="3" y="3" width="8" height="12" rx="1.8" />
+            <rect x="13" y="9" width="8" height="12" rx="1.8" />
+          </svg>
+          <h2><strong>แปลง</strong> PDF → <strong>JPG</strong></h2>
+        </div>
+        <p class="sub">แปลง PDF เป็นรูป JPG — สามารถดาวน์โหลดเป็น ZIP</p>
+        <div class="actions">
+          <label class="btn primary">
+            <input id="pdfInput" type="file" accept="application/pdf" hidden />
+            เลือกไฟล์ PDF
+          </label>
+          <button id="btnPdf2Jpg" class="btn ghost" disabled>แปลงและดาวน์โหลด JPG (ZIP)</button>
+        </div>
+        <div id="pdf2jpgStatus" class="status"></div>
+      </section>
 
-    <section class="card hidden" id="cardJpg2Pdf">
-      <div class="card-head">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" class="head-icon">
-          <rect x="2.5" y="2.5" width="19" height="19" rx="2.5" stroke="#7A5AF8" stroke-width="1.6"/>
-          <path d="M7 9h10M7 12h10M7 15h6" stroke="#C0AFE2" stroke-width="1.6" stroke-linecap="round"/>
-        </svg>
-        <h2>แปลง <strong>JPG/PNG</strong> → <strong>PDF</strong></h2>
-      </div>
-      <p class="sub">เลือกรูปหลายไฟล์ JPG/PNG แล้วรวมเป็น PDF</p>
-      <div class="actions">
-        <label class="btn primary">
-          <input id="imgInput" type="file" accept="image/png,image/jpeg" multiple hidden />
-          เลือกรูป JPG/PNG
-        </label>
-        <button id="btnJpg2Pdf" class="btn ghost" disabled>แปลงและดาวน์โหลด PDF</button>
-      </div>
-      <div id="jpg2pdfStatus" class="status"></div>
-    </section>
+      <!-- แผงระหว่างแปลง -->
+      <section class="card hidden" id="panelProgress" aria-live="polite">
+        <div class="progress-hero">
+          <div class="pdf-face" aria-hidden="true">PDF</div>
+          <div class="progress-text">
+            <h3>กำลังแปลงเป็น Image…</h3>
+            <p id="progressDesc">เตรียมเริ่มแปลงไฟล์</p>
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div class="bar" id="bar"></div>
+        </div>
+      </section>
+
+      <!-- ผลลัพธ์: โหลดทีละหน้า/ทั้งหมด -->
+      <section class="card hidden" id="panelResult">
+        <div class="card-head small-gap">
+          <h2>ผลการแปลง — ดาวน์โหลดได้เลย</h2>
+        </div>
+        <div class="result-actions">
+          <button id="btnDownloadZip" class="btn primary" disabled>ดาวน์โหลดทั้งหมด (ZIP)</button>
+          <button id="btnStartOver" class="btn">เริ่มใหม่</button>
+        </div>
+        <div id="thumbList" class="thumb-list" aria-live="polite"></div>
+      </section>
+    </div>
   </main>
 
   <footer class="site-footer">
@@ -78,12 +88,7 @@
     </div>
   </footer>
 
-  <!-- Libraries -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';</script>
   <script src="script.js"></script>
 </body>
 </html>
