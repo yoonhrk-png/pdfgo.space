@@ -1,76 +1,86 @@
-// ====== UI helpers ======
-const $ = (sel) => document.querySelector(sel);
+// ===== Helpers =====
+const $  = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
-const show = (el) => el.classList.remove('hidden');
-const hide = (el) => el.classList.add('hidden');
-const setText = (el, txt) => { el.textContent = txt; };
+const show = (el)=> el.classList.remove('hidden');
+const hide = (el)=> el.classList.add('hidden');
+const setText = (el, t)=> el && (el.textContent = t);
 
-const inp = $('#pdfInput');
-const btnZip = $('#btnPdf2Jpg');
-const statusEl = $('#pdf2jpgStatus');
+// ===== Mode switch =====
+const tabPdf2Jpg = $('#btnModePdf2Jpg');
+const tabJpg2Pdf = $('#btnModeJpg2Pdf');
+const cardPdf2Jpg = $('#cardPdf2Jpg');
+const cardJpg2Pdf = $('#cardJpg2Pdf');
+const panelProgressPdf = $('#panelProgressPdf');
+const panelResultPdf   = $('#panelResultPdf');
+const panelProgressImg = $('#panelProgressImg');
+const panelResultImg   = $('#panelResultImg');
 
-const progressPanel = $('#panelProgress');
-const progressDesc = $('#progressDesc');
-const bar = $('#bar');
+function showPdf2Jpg(){
+  tabPdf2Jpg.classList.add('active');
+  tabJpg2Pdf.classList.remove('active');
+  show(cardPdf2Jpg); hide(cardJpg2Pdf);
+  hide(panelProgressPdf); hide(panelResultPdf);
+  hide(panelProgressImg); hide(panelResultImg);
+}
+function showJpg2Pdf(){
+  tabJpg2Pdf.classList.add('active');
+  tabPdf2Jpg.classList.remove('active');
+  show(cardJpg2Pdf); hide(cardPdf2Jpg);
+  hide(panelProgressPdf); hide(panelResultPdf);
+  hide(panelProgressImg); hide(panelResultImg);
+}
+tabPdf2Jpg.addEventListener('click', showPdf2Jpg);
+tabJpg2Pdf.addEventListener('click', showJpg2Pdf);
 
-const resultPanel = $('#panelResult');
-const thumbList = $('#thumbList');
-const downloadAllBtn = $('#btnDownloadZip');
-const startOverBtn = $('#btnStartOver');
+// ===== PDF → JPG =====
+const pdfInput   = $('#pdfInput');
+const btnPdf2Jpg = $('#btnPdf2Jpg');
+const statusPdf  = $('#pdf2jpgStatus');
+const barPdf     = $('#barPdf');
+const progressDescPdf = $('#progressDescPdf');
+const thumbList  = $('#thumbList');
+const btnZipAll  = $('#btnDownloadZip');
+const btnStartOver = $('#btnStartOver');
 
-let lastPdf = null;
-let lastImages = [];
-let lastZip = null;
+let pdfFile = null;
+let zipPdf2Jpg = null;
 
-// mode switch (JPG→PDF ยังไม่เปิดใช้)
-$('#btnModePdf2Jpg').addEventListener('click', () => {});
-
-inp.addEventListener('change', () => {
-  if (inp.files && inp.files[0]) {
-    lastPdf = inp.files[0];
-    setText(statusEl, `เลือกไฟล์แล้ว: ${lastPdf.name} (${Math.round(lastPdf.size/1024/1024*100)/100} MB)`);
-    btnZip.disabled = false;
-  } else {
-    setText(statusEl, '');
-    btnZip.disabled = true;
-  }
+pdfInput?.addEventListener('change', ()=>{
+  pdfFile = pdfInput.files?.[0] || null;
+  btnPdf2Jpg.disabled = !pdfFile;
+  setText(statusPdf, pdfFile ? `เลือกไฟล์แล้ว: ${pdfFile.name}` : '');
 });
 
-btnZip.addEventListener('click', async () => {
-  if (!lastPdf) return;
-  // เตรียม UI
-  hide($('#cardPdf2Jpg'));
-  show(progressPanel);
-  setText(progressDesc, 'กำลังโหลดไฟล์ PDF…');
-  bar.style.width = '5%';
+btnPdf2Jpg?.addEventListener('click', async ()=>{
+  if (!pdfFile) return;
+  hide(cardPdf2Jpg);
+  show(panelProgressPdf);
+  setText(progressDescPdf, 'กำลังโหลดไฟล์…');
+  barPdf.style.width = '5%';
 
   try {
-    const buf = await lastPdf.arrayBuffer();
+    const buf = await pdfFile.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
     const total = pdf.numPages;
 
-    // ZIP เตรียมไว้
-    lastZip = new JSZip();
-    const folder = lastZip.folder('images');
-    lastImages = [];
+    zipPdf2Jpg = new JSZip();
+    const folder = zipPdf2Jpg.folder('images');
     thumbList.innerHTML = '';
-    downloadAllBtn.disabled = true;
+    btnZipAll.disabled = true;
 
-    for (let i = 1; i <= total; i++) {
-      setText(progressDesc, `กำลังแปลงหน้า ${i} / ${total}`);
+    for (let i=1;i<=total;i++){
+      setText(progressDescPdf, `กำลังแปลงหน้า ${i} / ${total}`);
       const page = await pdf.getPage(i);
-      const viewport = page.getViewport({ scale: 2.0 }); // คุณภาพดี
+      const viewport = page.getViewport({ scale: 2 });
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       canvas.width = viewport.width;
       canvas.height = viewport.height;
       await page.render({ canvasContext: ctx, viewport }).promise;
 
-      const blob = await new Promise((res) => canvas.toBlob(res, 'image/jpeg', 0.92));
-      lastImages.push(blob);
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.92));
       folder.file(`page-${i}.jpg`, blob);
 
-      // แสดงรายการดาวน์โหลดรายหน้า
       const url = URL.createObjectURL(blob);
       const card = document.createElement('div');
       card.className = 'thumb';
@@ -82,49 +92,107 @@ btnZip.addEventListener('click', async () => {
         </div>`;
       thumbList.appendChild(card);
 
-      const pct = Math.round((i/total)*100);
-      bar.style.width = pct + '%';
+      barPdf.style.width = Math.round((i/total)*100) + '%';
     }
 
-    setText(progressDesc, 'สร้าง ZIP สำหรับดาวน์โหลด…');
-    bar.style.width = '100%';
-
-    // พร้อมแสดงผลลัพธ์
-    hide(progressPanel);
-    show(resultPanel);
-    downloadAllBtn.disabled = false;
-  } catch (err) {
+    hide(panelProgressPdf);
+    show(panelResultPdf);
+    btnZipAll.disabled = false;
+  } catch(err){
     console.error(err);
     alert('แปลงไฟล์ไม่สำเร็จ: ' + err.message);
-    // กลับหน้าแรก
-    hide(progressPanel);
-    show($('#cardPdf2Jpg'));
+    hide(panelProgressPdf);
+    show(cardPdf2Jpg);
   }
 });
 
-// ดาวน์โหลดรายหน้า
-thumbList.addEventListener('click', (e) => {
+thumbList?.addEventListener('click', (e)=>{
   const btn = e.target.closest('button[data-url]');
-  if (!btn) return;
+  if(!btn) return;
   const url = btn.getAttribute('data-url');
-  // ใช้ชื่อจาก data-url
   saveAs(url, btn.getAttribute('download') || 'page.jpg');
 });
 
-// ดาวน์โหลดทั้งหมด ZIP
-downloadAllBtn.addEventListener('click', async () => {
-  if (!lastZip) return;
-  const blob = await lastZip.generateAsync({ type: 'blob' });
-  saveAs(blob, (lastPdf?.name?.replace(/\.pdf$/i,'') || 'pdf') + '-images.zip');
+btnZipAll?.addEventListener('click', async ()=>{
+  if(!zipPdf2Jpg) return;
+  const blob = await zipPdf2Jpg.generateAsync({ type:'blob' });
+  const base = (pdfFile?.name || 'pdf').replace(/\.[^.]+$/,'');
+  saveAs(blob, base + '-images.zip');
 });
 
-// เริ่มใหม่
-startOverBtn.addEventListener('click', () => {
-  lastPdf = null; lastImages = []; lastZip = null;
-  inp.value = '';
-  thumbList.innerHTML = '';
-  setText(statusEl, '');
-  btnZip.disabled = true;
-  hide(resultPanel);
-  show($('#cardPdf2Jpg'));
+btnStartOver?.addEventListener('click', ()=>{
+  pdfInput.value=''; pdfFile=null; zipPdf2Jpg=null;
+  thumbList.innerHTML=''; btnPdf2Jpg.disabled=true; setText(statusPdf,'');
+  hide(panelResultPdf); show(cardPdf2Jpg);
+});
+
+// ===== JPG → PDF =====
+const imgInput     = $('#imgInput');
+const btnJpg2Pdf   = $('#btnJpg2Pdf');
+const statusImg    = $('#jpg2pdfStatus');
+const barImg       = $('#barImg');
+const progressDescImg = $('#progressDescImg');
+const btnPdfOut    = $('#btnDownloadPdf');
+const btnStartOverImg = $('#btnStartOverImg');
+const pdfResultNote = $('#jpg2pdfResultNote');
+
+let imgFiles = [];
+
+imgInput?.addEventListener('change', ()=>{
+  imgFiles = imgInput.files ? Array.from(imgInput.files) : [];
+  btnJpg2Pdf.disabled = imgFiles.length === 0;
+  setText(statusImg, imgFiles.length ? `เลือกรูป ${imgFiles.length} ไฟล์` : '');
+});
+
+btnJpg2Pdf?.addEventListener('click', async ()=>{
+  if (!imgFiles.length) return;
+  hide(cardJpg2Pdf);
+  show(panelProgressImg);
+  setText(progressDescImg, 'กำลังเตรียมรูป…');
+  barImg.style.width = '5%';
+
+  try {
+    const { PDFDocument } = PDFLib;
+    const doc = await PDFDocument.create();
+
+    for (let i=0; i<imgFiles.length; i++){
+      const f = imgFiles[i];
+      setText(progressDescImg, `กำลังเพิ่มรูป ${i+1} / ${imgFiles.length}`);
+      const bytes = await f.arrayBuffer();
+
+      let img, w, h;
+      if (f.type === 'image/png'){
+        img = await doc.embedPng(bytes);
+      } else {
+        img = await doc.embedJpg(bytes);
+      }
+      w = img.width; h = img.height;
+
+      const page = doc.addPage([w, h]);
+      page.drawImage(img, { x:0, y:0, width:w, height:h });
+
+      barImg.style.width = Math.round(((i+1)/imgFiles.length)*100) + '%';
+    }
+
+    const pdfBytes = await doc.save();
+    const blob = new Blob([pdfBytes], { type:'application/pdf' });
+    const url = URL.createObjectURL(blob);
+
+    hide(panelProgressImg);
+    show(panelResultImg);
+    btnPdfOut.href = url;
+    const outName = 'images-to.pdf';
+    btnPdfOut.download = outName;
+    setText(pdfResultNote, `ได้ไฟล์ ${outName} ขนาด ~${(blob.size/1024/1024).toFixed(2)} MB`);
+  } catch(err){
+    console.error(err);
+    alert('รวมรูปเป็น PDF ไม่สำเร็จ: ' + err.message);
+    hide(panelProgressImg);
+    show(cardJpg2Pdf);
+  }
+});
+
+btnStartOverImg?.addEventListener('click', ()=>{
+  imgInput.value=''; imgFiles=[]; btnJpg2Pdf.disabled=true; setText(statusImg,'');
+  hide(panelResultImg); show(cardJpg2Pdf);
 });
