@@ -1,32 +1,52 @@
 <body>
+  <!-- Header -->
   <header class="topbar">
     <div class="logo">PDFGo</div>
   </header>
 
-  <main class="hero">
-    <div class="card">
-      <h1>PDF to JPG</h1>
-      <p class="subtitle">
-        แปลงไฟล์ PDF เป็นรูปภาพออนไลน์ ฟรี และปลอดภัย
+  <!-- Main -->
+  <main class="page">
+    <h1 class="title">Convert PDF to JPG</h1>
+
+    <div class="upload-box" id="drop-zone">
+      <div class="upload-icon">📄</div>
+
+      <button class="choose-btn">
+        Choose files
+        <span class="arrow">▾</span>
+      </button>
+
+      <p class="drop-text">or drop PDF here</p>
+
+      <input type="file" id="fileInput" accept="application/pdf" hidden>
+    </div>
+
+    <!-- Options -->
+    <div class="options">
+      <input type="number" id="startPage" value="1" min="1" placeholder="From page">
+      <input type="number" id="endPage" value="1" min="1" placeholder="To page">
+    </div>
+
+    <button id="convertBtn" class="convert-btn" disabled>
+      Convert to JPG
+    </button>
+
+    <progress id="progress" value="0" max="100"></progress>
+    <p id="progressText"></p>
+
+    <!-- Info -->
+    <section class="info">
+      <p>
+        Convert your PDFs into JPG images quickly and easily online.
+        No signup required.
       </p>
 
-      <div id="drop-zone">
-        <div class="icon">📄</div>
-        <strong>Choose PDF files</strong>
-        <span>or drop PDF here</span>
-        <input type="file" id="fileInput" accept="application/pdf" hidden>
-      </div>
-
-      <div class="options">
-        <input type="number" id="startPage" value="1" min="1" placeholder="From page">
-        <input type="number" id="endPage" value="1" min="1" placeholder="To page">
-      </div>
-
-      <button id="convertBtn" disabled>Convert to JPG</button>
-
-      <progress id="progress" value="0" max="100"></progress>
-      <p id="progressText"></p>
-    </div>
+      <ul>
+        <li>Trusted by users worldwide</li>
+        <li>Fast and simple PDF to JPG conversion</li>
+        <li>Works on all devices</li>
+      </ul>
+    </section>
   </main>
 
   <footer class="footer">
