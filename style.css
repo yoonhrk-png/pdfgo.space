@@ -1,18 +1,41 @@
-/* ========== RESET ========== */
+/* =========================
+   RESET & VARIABLES
+========================= */
+:root {
+  --pink-50: #fff1f5;
+  --pink-100: #ffe4ec;
+  --pink-200: #ffc7d6;
+  --pink-300: #ffa3ba;
+  --pink-400: #fb7185;
+
+  --purple-50: #faf5ff;
+  --purple-100: #f3e8ff;
+  --purple-200: #e9d5ff;
+  --purple-300: #d8b4fe;
+  --purple-400: #c084fc;
+  --purple-500: #a855f7;
+
+  --text-main: #1f2937;
+  --text-sub: #6b7280;
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #ffffff;
-  color: #111827;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, var(--pink-50), var(--purple-50));
+  color: var(--text-main);
 }
 
-/* ========== HEADER ========== */
+/* =========================
+   HEADER
+========================= */
 .topbar {
   height: 64px;
+  background: white;
   border-bottom: 1px solid #e5e7eb;
   display: flex;
   align-items: center;
@@ -21,14 +44,17 @@ body {
 
 .logo {
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 800;
+  color: var(--purple-500);
 }
 
-/* ========== PAGE ========== */
+/* =========================
+   PAGE
+========================= */
 .page {
   max-width: 960px;
   margin: 0 auto;
-  padding: 48px 24px;
+  padding: 56px 24px;
   text-align: center;
 }
 
@@ -36,19 +62,36 @@ body {
   font-size: 40px;
   font-weight: 800;
   margin-bottom: 36px;
+  color: #3b0764;
 }
 
-/* ========== UPLOAD BOX (SMALLPDF STYLE) ========== */
+/* =========================
+   UPLOAD BOX
+========================= */
 .upload-box {
-  background: #facc15; /* yellow */
-  border-radius: 16px;
-  padding: 64px 20px;
+  background: linear-gradient(
+    135deg,
+    var(--pink-200),
+    var(--purple-300)
+  );
+  border-radius: 20px;
+  padding: 72px 24px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: transform .15s ease, box-shadow .15s ease;
+  box-shadow: 0 20px 40px rgba(0,0,0,.12);
+}
+
+.upload-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 28px 60px rgba(0,0,0,.18);
 }
 
 .upload-box.dragover {
-  background: #eab308;
+  background: linear-gradient(
+    135deg,
+    var(--pink-300),
+    var(--purple-400)
+  );
 }
 
 .upload-icon {
@@ -57,13 +100,14 @@ body {
 }
 
 .choose-btn {
-  background: #ffffff;
+  background: white;
   border: none;
-  border-radius: 8px;
-  padding: 14px 26px;
+  border-radius: 10px;
+  padding: 14px 30px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
+  color: var(--purple-500);
 }
 
 .choose-btn:hover {
@@ -77,46 +121,57 @@ body {
 .drop-text {
   margin-top: 12px;
   font-size: 14px;
+  color: #374151;
 }
 
-/* ========== OPTIONS ========== */
+/* =========================
+   OPTIONS
+========================= */
 .options {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin: 28px 0;
+  gap: 14px;
+  margin: 32px 0;
 }
 
 .options input {
-  width: 140px;
-  padding: 10px 12px;
+  width: 150px;
+  padding: 12px;
   font-size: 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #d1d5db;
 }
 
-/* ========== CONVERT BUTTON ========== */
+/* =========================
+   CONVERT BUTTON
+========================= */
 .convert-btn {
-  background: #ef4444;
+  background: linear-gradient(
+    135deg,
+    var(--pink-400),
+    var(--purple-500)
+  );
   color: white;
   border: none;
-  border-radius: 10px;
-  padding: 14px 32px;
+  border-radius: 12px;
+  padding: 16px 36px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
 }
 
 .convert-btn:disabled {
-  opacity: 0.5;
+  opacity: .5;
   cursor: not-allowed;
 }
 
-/* ========== PROGRESS ========== */
+/* =========================
+   PROGRESS
+========================= */
 progress {
   width: 100%;
   max-width: 420px;
-  height: 10px;
+  height: 12px;
   margin: 24px auto 0;
   display: block;
 }
@@ -124,17 +179,18 @@ progress {
 #progressText {
   margin-top: 8px;
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-sub);
 }
 
-/* ========== INFO SECTION ========== */
+/* =========================
+   INFO SECTION
+========================= */
 .info {
-  margin-top: 56px;
+  margin-top: 64px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 40px;
   text-align: left;
-  align-items: start;
 }
 
 .info p {
@@ -159,22 +215,26 @@ progress {
   content: "✔";
   position: absolute;
   left: 0;
-  color: #22c55e;
+  color: var(--purple-500);
   font-weight: bold;
 }
 
-/* ========== FOOTER ========== */
+/* =========================
+   FOOTER
+========================= */
 .footer {
   text-align: center;
   font-size: 13px;
-  color: #6b7280;
-  padding: 32px 16px;
+  color: var(--text-sub);
+  padding: 36px 16px;
 }
 
-/* ========== RESPONSIVE ========== */
+/* =========================
+   RESPONSIVE
+========================= */
 @media (max-width: 768px) {
   .title {
-    font-size: 32px;
+    font-size: 30px;
   }
 
   .info {
