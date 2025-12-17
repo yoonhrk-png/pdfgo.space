@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PDFGo – Free Online PDF Tools</title>
+
+  <!-- SEO -->
+  <meta name="description" content="PDFGo provides free online PDF tools. Convert, merge, compress PDF files directly in your browser. Files never leave your device.">
+  <meta name="keywords" content="PDF tools, PDF to JPG, JPG to PDF, merge PDF, compress PDF, online PDF">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="PDFGo – Free Online PDF Tools">
+  <meta property="og:description" content="All PDF tools in one place. Secure, fast, and works directly in your browser.">
+  <meta property="og:type" content="website">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="topbar">
+    <div class="logo">PDFGo</div>
+
+    <nav class="nav">
+      <a href="index.html" class="active">Home</a>
+      <a href="pdf-to-jpg.html">PDF to JPG</a>
+      <a href="jpg-to-pdf.html">JPG to PDF</a>
+      <a href="merge-pdf.html">Merge PDF</a>
+      <a href="compress-pdf.html">Compress PDF</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <main class="home">
+    <h1 class="home-title">All PDF tools in one place</h1>
+    <p class="home-sub">
+      Convert, merge, and compress PDFs directly in your browser.<br>
+      Files never leave your device.
+    </p>
+
+    <!-- Tools grid -->
+    <section class="tools">
+      <a class="tool-card" href="pdf-to-jpg.html">
+        <div class="tool-icon">📄</div>
+        <h3>PDF to JPG</h3>
+        <p>Convert PDF pages into images</p>
+      </a>
+
+      <a class="tool-card" href="jpg-to-pdf.html">
+        <div class="tool-icon">🖼️</div>
+        <h3>JPG to PDF</h3>
+        <p>Combine images into a PDF</p>
+      </a>
+
+      <a class="tool-card" href="merge-pdf.html">
+        <div class="tool-icon">📑</div>
+        <h3>Merge PDF</h3>
+        <p>Combine multiple PDFs into one</p>
+      </a>
+
+      <a class="tool-card" href="compress-pdf.html">
+        <div class="tool-icon">🗜️</div>
+        <h3>Compress PDF</h3>
+        <p>Reduce PDF file size</p>
+      </a>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    Files never leave your device • PDFGo
+  </footer>
+
+</body>
+</html>
