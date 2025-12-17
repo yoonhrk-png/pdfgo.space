@@ -1,87 +1,147 @@
-const dropZone = document.getElementById("drop-zone");
-const fileInput = document.getElementById("fileInput");
-const convertBtn = document.getElementById("convertBtn");
-const progress = document.getElementById("progress");
-const progressText = document.getElementById("progressText");
-
-let selectedFile = null;
-
-dropZone.onclick = () => fileInput.click();
-
-fileInput.onchange = () => {
-  selectedFile = fileInput.files[0];
-  convertBtn.disabled = !selectedFile;
-};
-
-dropZone.addEventListener("dragover", e => {
-  e.preventDefault();
-  dropZone.classList.add("dragover");
-});
-
-dropZone.addEventListener("dragleave", () => {
-  dropZone.classList.remove("dragover");
-});
-
-dropZone.addEventListener("drop", e => {
-  e.preventDefault();
-  dropZone.classList.remove("dragover");
-  selectedFile = e.dataTransfer.files[0];
-  convertBtn.disabled = !selectedFile;
-});
-
-convertBtn.onclick = () => convertPDF(selectedFile);
-
-async function convertPDF(file) {
-  convertBtn.disabled = true;
-  progress.value = 0;
-
-  const buffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
-
-  let start = Math.max(1, parseInt(startPage.value || 1));
-  let end = Math.min(pdf.numPages, parseInt(endPage.value || pdf.numPages));
-  if (start > end) [start, end] = [end, start];
-
-  const total = end - start + 1;
-  const zip = new JSZip();
-
-  for (let i = start; i <= end; i++) {
-    progressText.textContent = `กำลังแปลงหน้า ${i}/${end}`;
-
-    const page = await pdf.getPage(i);
-    const viewport = page.getViewport({ scale: 2 });
-
-    const canvas = document.createElement("canvas");
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-
-    await page.render({
-      canvasContext: canvas.getContext("2d"),
-      viewport
-    }).promise;
-
-    const blob = await new Promise(res =>
-      canvas.toBlob(res, "image/png")
-    );
-
-    zip.file(`page-${i}.png`, blob);
-    progress.value = Math.round(((i - start + 1) / total) * 100);
-  }
-
-  progressText.textContent = "กำลังสร้าง ZIP...";
-  const zipBlob = await zip.generateAsync({ type: "blob" });
-
-  download(zipBlob, `pdf-${start}-to-${end}.zip`);
-
-  progressText.textContent = "เสร็จเรียบร้อย ✅";
-  convertBtn.disabled = false;
+* {
+  box-sizing: border-box;
 }
 
-function download(blob, filename) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
+body {
+  margin: 0;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f8f9fb;
+  color: #111827;
+}
+
+/* Top bar */
+.topbar {
+  height: 64px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 20px;
+  color: #ef4444;
+}
+
+/* Hero section */
+.hero {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+}
+
+/* Main card */
+.card {
+  width: 100%;
+  max-width: 640px;
+  background: white;
+  border-radius: 16px;
+  padding: 48px 40px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,.08);
+}
+
+h1 {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin-top: 12px;
+  font-size: 16px;
+  color: #6b7280;
+}
+
+/* Drop zone */
+#drop-zone {
+  margin-top: 36px;
+  padding: 40px 20px;
+  border-radius: 14px;
+  background: #ef4444;
+  color: white;
+  cursor: pointer;
+  transition: .2s;
+}
+
+#drop-zone:hover {
+  background: #dc2626;
+}
+
+#drop-zone .icon {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+#drop-zone strong {
+  display: block;
+  font-size: 18px;
+}
+
+#drop-zone span {
+  font-size: 14px;
+  opacity: .9;
+}
+
+#drop-zone.dragover {
+  background: #b91c1c;
+}
+
+/* Options */
+.options {
+  display: flex;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.options input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+/* Button */
+button {
+  margin-top: 32px;
+  width: 100%;
+  padding: 16px;
+  font-size: 17px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  background: #ef4444;
+  color: white;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* Progress */
+progress {
+  width: 100%;
+  height: 10px;
+  margin-top: 20px;
+}
+
+#progressText {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  font-size: 13px;
+  color: #9ca3af;
+  padding: 24px;
 }
