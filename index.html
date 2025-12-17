@@ -1,43 +1,39 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8" />
-  <title>PDFGo – PDF to Images</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="แปลง PDF เป็นรูปภาพ ฟรี ทำงานในเบราว์เซอร์" />
-
-  <link rel="stylesheet" href="style.css">
-</head>
 <body>
+  <header class="topbar">
+    <div class="logo">PDFGo</div>
+  </header>
 
-<div class="container">
-  <h1>PDF → รูปภาพ</h1>
+  <main class="hero">
+    <div class="card">
+      <h1>PDF to JPG</h1>
+      <p class="subtitle">
+        แปลงไฟล์ PDF เป็นรูปภาพออนไลน์ ฟรี และปลอดภัย
+      </p>
 
-  <div id="drop-zone">
-    ลากไฟล์ PDF มาวาง<br>หรือคลิกเพื่อเลือกไฟล์
-    <input type="file" id="fileInput" accept="application/pdf" hidden>
-  </div>
+      <div id="drop-zone">
+        <div class="icon">📄</div>
+        <strong>Choose PDF files</strong>
+        <span>or drop PDF here</span>
+        <input type="file" id="fileInput" accept="application/pdf" hidden>
+      </div>
 
-  <div class="options">
-    <input type="number" id="startPage" value="1" min="1" placeholder="หน้าเริ่ม">
-    <input type="number" id="endPage" value="1" min="1" placeholder="หน้าสิ้นสุด">
-  </div>
+      <div class="options">
+        <input type="number" id="startPage" value="1" min="1" placeholder="From page">
+        <input type="number" id="endPage" value="1" min="1" placeholder="To page">
+      </div>
 
-  <button id="convertBtn" disabled>แปลงไฟล์</button>
+      <button id="convertBtn" disabled>Convert to JPG</button>
 
-  <progress id="progress" value="0" max="100"></progress>
-  <p id="progressText"></p>
-</div>
+      <progress id="progress" value="0" max="100"></progress>
+      <p id="progressText"></p>
+    </div>
+  </main>
 
-<footer>
-  © PDFGo • Files never leave your device
-</footer>
+  <footer class="footer">
+    Files never leave your device • PDFGo
+  </footer>
 
-<!-- Libraries -->
-<script src="https://unpkg.com/pdfjs-dist/build/pdf.min.js"></script>
-<script src="https://unpkg.com/jszip/dist/jszip.min.js"></script>
-
-<!-- Your script -->
-<script src="script.js"></script>
+  <script src="https://unpkg.com/pdfjs-dist/build/pdf.min.js"></script>
+  <script src="https://unpkg.com/jszip/dist/jszip.min.js"></script>
+  <script src="script.js"></script>
 </body>
-</html>
