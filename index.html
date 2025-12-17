@@ -1,3 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Convert PDF to JPG | PDFGo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- IMPORTANT: Load CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
 <body>
   <!-- Header -->
   <header class="topbar">
@@ -18,16 +29,37 @@
 
       <p class="drop-text">or drop PDF here</p>
 
-      <input type="file" id="fileInput" accept="application/pdf" hidden>
+      <input
+        type="file"
+        id="fileInput"
+        accept="application/pdf"
+        hidden
+      />
     </div>
 
     <!-- Options -->
     <div class="options">
-      <input type="number" id="startPage" value="1" min="1" placeholder="From page">
-      <input type="number" id="endPage" value="1" min="1" placeholder="To page">
+      <input
+        type="number"
+        id="startPage"
+        value="1"
+        min="1"
+        placeholder="From page"
+      />
+      <input
+        type="number"
+        id="endPage"
+        value="1"
+        min="1"
+        placeholder="To page"
+      />
     </div>
 
-    <button id="convertBtn" class="convert-btn" disabled>
+    <button
+      id="convertBtn"
+      class="convert-btn"
+      disabled
+    >
       Convert to JPG
     </button>
 
@@ -49,11 +81,16 @@
     </section>
   </main>
 
+  <!-- Footer -->
   <footer class="footer">
     Files never leave your device • PDFGo
   </footer>
 
+  <!-- Libraries -->
   <script src="https://unpkg.com/pdfjs-dist/build/pdf.min.js"></script>
   <script src="https://unpkg.com/jszip/dist/jszip.min.js"></script>
+
+  <!-- Your logic -->
   <script src="script.js"></script>
 </body>
+</html>
