@@ -1,133 +1,200 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PDFGo.space — PDF ↔ JPG</title>
-  <meta name="description" content="แปลง PDF เป็น JPG และ JPG/PNG เป็น PDF ออนไลน์ ใช้งานง่าย ปลอดภัย">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <title>PDFGo – PDF to Images</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="แปลง PDF เป็นรูปภาพออนไลน์ ฟรี ทำงานในเบราว์เซอร์ ไม่อัปโหลดไฟล์" />
 
-  <!-- libs -->
-  <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
-  <script>pdfjsLib.GlobalWorkerOptions.workerSrc='https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';</script>
-  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-  <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f8fafc;
+      padding: 30px;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: auto;
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.08);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #drop-zone {
+      border: 2px dashed #94a3b8;
+      padding: 40px;
+      text-align: center;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    #drop-zone.dragover {
+      border-color: #6366f1;
+      background: #eef2ff;
+    }
+
+    .options {
+      display: flex;
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .options input {
+      width: 100%;
+      padding: 8px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .5;
+    }
+
+    progress {
+      width: 100%;
+      height: 16px;
+      margin-top: 14px;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 12px;
+      margin-top: 20px;
+      color: #64748b;
+    }
+  </style>
 </head>
 <body>
-  <header class="site-header">
-    <div class="container">
-      <div class="brand">
-        <svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <rect x="3" y="3" width="8" height="12" rx="1.8" />
-          <rect x="13" y="9" width="8" height="12" rx="1.8" />
-        </svg>
-        <h1 class="brand-name">PDFGo<span class="dot">.</span>space</h1>
-      </div>
-      <p class="tagline">เลือกรูป JPG/PNG แล้วแปลงเป็นไฟล์ PDF ได้ในไม่กี่วินาที — หรือแปลง PDF เป็น JPG ง่าย ๆ</p>
-    </div>
-  </header>
 
-  <main class="main container">
-    <!-- โหมด -->
-    <div class="mode-switch" role="tablist" aria-label="เลือกเครื่องมือ">
-      <button id="btnModePdf2Jpg" class="chip active" role="tab" aria-selected="true">PDF → JPG</button>
-      <button id="btnModeJpg2Pdf" class="chip" role="tab" aria-selected="false">JPG → PDF</button>
-    </div>
+<div class="container">
+  <h1>PDF → รูปภาพ</h1>
 
-    <div class="center-stage">
-      <!-- ===== PDF → JPG ===== -->
-      <section class="card" id="cardPdf2Jpg">
-        <div class="card-head">
-          <svg width="24" height="24" viewBox="0 0 24 24" class="head-icon" aria-hidden="true">
-            <rect x="3" y="3" width="8" height="12" rx="1.8" />
-            <rect x="13" y="9" width="8" height="12" rx="1.8" />
-          </svg>
-          <h2><strong>แปลง</strong> PDF → <strong>JPG</strong></h2>
-        </div>
-        <p class="sub">แปลง PDF เป็นรูป JPG — สามารถดาวน์โหลดเป็น ZIP</p>
-        <div class="actions">
-          <label class="btn primary">
-            <input id="pdfInput" type="file" accept="application/pdf" hidden />
-            เลือกไฟล์ PDF
-          </label>
-          <button id="btnPdf2Jpg" class="btn ghost" disabled>แปลงและดาวน์โหลด JPG (ZIP)</button>
-        </div>
-        <div id="pdf2jpgStatus" class="status"></div>
-      </section>
+  <div id="drop-zone">
+    ลากไฟล์ PDF มาวาง<br>หรือคลิกเพื่อเลือกไฟล์
+    <input type="file" id="fileInput" accept="application/pdf" hidden>
+  </div>
 
-      <section class="card hidden" id="panelProgressPdf" aria-live="polite">
-        <div class="progress-hero">
-          <div class="pdf-face" aria-hidden="true">PDF</div>
-          <div class="progress-text">
-            <h3>กำลังแปลงเป็น Image…</h3>
-            <p id="progressDescPdf">เตรียมเริ่มแปลงไฟล์</p>
-          </div>
-        </div>
-        <div class="progress-bar"><div class="bar" id="barPdf"></div></div>
-      </section>
+  <div class="options">
+    <input type="number" id="startPage" value="1" min="1" placeholder="หน้าเริ่ม">
+    <input type="number" id="endPage" value="1" min="1" placeholder="หน้าสิ้นสุด">
+  </div>
 
-      <section class="card hidden" id="panelResultPdf">
-        <div class="card-head small-gap"><h2>ผลการแปลง — ดาวน์โหลดได้เลย</h2></div>
-        <div class="result-actions">
-          <button id="btnDownloadZip" class="btn primary" disabled>ดาวน์โหลดทั้งหมด (ZIP)</button>
-          <button id="btnStartOver" class="btn">เริ่มใหม่</button>
-        </div>
-        <div id="thumbList" class="thumb-list" aria-live="polite"></div>
-      </section>
+  <button id="convertBtn" disabled>แปลงไฟล์</button>
 
-      <!-- ===== JPG → PDF ===== -->
-      <section class="card hidden" id="cardJpg2Pdf">
-        <div class="card-head">
-          <svg width="24" height="24" viewBox="0 0 24 24" class="head-icon" aria-hidden="true">
-            <rect x="2.5" y="2.5" width="19" height="19" rx="2.5" />
-            <path d="M7 9h10M7 12h10M7 15h6" />
-          </svg>
-          <h2><strong>แปลง</strong> JPG/PNG → <strong>PDF</strong></h2>
-        </div>
-        <p class="sub">เลือกรูปหลายไฟล์ JPG/PNG แล้วรวมเป็น PDF</p>
-        <div class="actions">
-          <label class="btn primary">
-            <input id="imgInput" type="file" accept="image/png,image/jpeg" multiple hidden />
-            เลือกรูป JPG/PNG
-          </label>
-          <button id="btnJpg2Pdf" class="btn ghost" disabled>แปลงและดาวน์โหลด PDF</button>
-        </div>
-        <div id="jpg2pdfStatus" class="status"></div>
-      </section>
+  <progress id="progress" value="0" max="100"></progress>
+  <p id="progressText"></p>
+</div>
 
-      <section class="card hidden" id="panelProgressImg" aria-live="polite">
-        <div class="progress-hero">
-          <div class="pdf-face" aria-hidden="true">IMG</div>
-          <div class="progress-text">
-            <h3>กำลังรวมภาพเป็น PDF…</h3>
-            <p id="progressDescImg">เตรียมเริ่ม…</p>
-          </div>
-        </div>
-        <div class="progress-bar"><div class="bar" id="barImg"></div></div>
-      </section>
+<footer>
+  © PDFGo • Files never leave your device
+</footer>
 
-      <section class="card hidden" id="panelResultImg">
-        <div class="card-head small-gap"><h2>ไฟล์ PDF พร้อมดาวน์โหลด</h2></div>
-        <div class="result-actions">
-          <a id="btnDownloadPdf" class="btn primary" download="images-to.pdf">ดาวน์โหลด PDF</a>
-          <button id="btnStartOverImg" class="btn">เริ่มใหม่</button>
-        </div>
-        <div class="status" id="jpg2pdfResultNote"></div>
-      </section>
+<script src="https://unpkg.com/pdfjs-dist/build/pdf.min.js"></script>
+<script src="https://unpkg.com/jszip/dist/jszip.min.js"></script>
 
-    </div>
-  </main>
+<script>
+  const dropZone = document.getElementById("drop-zone");
+  const fileInput = document.getElementById("fileInput");
+  const convertBtn = document.getElementById("convertBtn");
+  const progress = document.getElementById("progress");
+  const progressText = document.getElementById("progressText");
 
-  <footer class="site-footer">
-    <div class="container">
-      <small>© 2025 <strong>PDFGo.space</strong> — เครื่องมือแปลงไฟล์ PDF ออนไลน์</small>
-    </div>
-  </footer>
+  let selectedFile = null;
 
-  <script src="script.js"></script>
+  dropZone.onclick = () => fileInput.click();
+
+  fileInput.onchange = () => {
+    selectedFile = fileInput.files[0];
+    convertBtn.disabled = !selectedFile;
+  };
+
+  dropZone.addEventListener("dragover", e => {
+    e.preventDefault();
+    dropZone.classList.add("dragover");
+  });
+
+  dropZone.addEventListener("dragleave", () => {
+    dropZone.classList.remove("dragover");
+  });
+
+  dropZone.addEventListener("drop", e => {
+    e.preventDefault();
+    dropZone.classList.remove("dragover");
+    selectedFile = e.dataTransfer.files[0];
+    convertBtn.disabled = !selectedFile;
+  });
+
+  convertBtn.onclick = () => convertPDF(selectedFile);
+
+  async function convertPDF(file) {
+    convertBtn.disabled = true;
+    progress.value = 0;
+
+    const buffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+
+    let start = Math.max(1, parseInt(startPage.value || 1));
+    let end = Math.min(pdf.numPages, parseInt(endPage.value || pdf.numPages));
+    if (start > end) [start, end] = [end, start];
+
+    const total = end - start + 1;
+    const zip = new JSZip();
+
+    for (let i = start; i <= end; i++) {
+      progressText.textContent = `กำลังแปลงหน้า ${i}/${end}`;
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale: 2 });
+
+      const canvas = document.createElement("canvas");
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+
+      await page.render({
+        canvasContext: canvas.getContext("2d"),
+        viewport
+      }).promise;
+
+      const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
+      zip.file(`page-${i}.png`, blob);
+
+      progress.value = Math.round(((i - start + 1) / total) * 100);
+    }
+
+    progressText.textContent = "กำลังสร้าง ZIP...";
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+
+    download(zipBlob, `pdf-${start}-to-${end}.zip`);
+
+    progressText.textContent = "เสร็จเรียบร้อย ✅";
+    convertBtn.disabled = false;
+  }
+
+  function download(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+</script>
+
 </body>
 </html>
