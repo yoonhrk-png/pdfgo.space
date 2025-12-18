@@ -22,14 +22,24 @@
     <div class="upload-box">
       <div class="upload-icon">📄</div>
 
-      <button class="choose-btn">
+      <button class="choose-btn" id="chooseBtn">
         Choose files
       </button>
 
-      <p class="drop-text">or drop PDF here</p>
+      <p class="drop-text" id="fileName">
+        or drop PDF here
+      </p>
+
+      <!-- input file (ซ่อน) -->
+      <input
+        type="file"
+        id="fileInput"
+        accept="application/pdf"
+        hidden
+      />
     </div>
 
-    <button class="convert-btn" disabled>
+    <button class="convert-btn" id="convertBtn" disabled>
       Convert to JPG
     </button>
   </main>
