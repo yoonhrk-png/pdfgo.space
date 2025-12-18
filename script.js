@@ -5,16 +5,17 @@ const convertBtn = document.getElementById("convertBtn");
 const uploadBox = document.querySelector(".upload-box");
 const preview = document.getElementById("preview");
 
+let selectedFile = null;
+
 // PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-// ===== Button choose =====
+// ===== Choose file =====
 chooseBtn.addEventListener("click", () => {
   fileInput.click();
 });
 
-// ===== File picker =====
 fileInput.addEventListener("change", () => {
   handleFile(fileInput.files[0]);
 });
@@ -44,6 +45,7 @@ function handleFile(file) {
     return;
   }
 
+  selectedFile = file;
   fileNameText.textContent = file.name;
   convertBtn.disabled = false;
   convertBtn.style.opacity = "1";
@@ -52,9 +54,9 @@ function handleFile(file) {
   renderPreview(file);
 }
 
-// ===== Render PDF preview =====
+// ===== Preview page 1 =====
 async function renderPreview(file) {
-  preview.innerHTML = ""; // clear
+  preview.innerHTML = "";
 
   const fileURL = URL.createObjectURL(file);
   const pdf = await pdfjsLib.getDocument(fileURL).promise;
@@ -66,14 +68,44 @@ async function renderPreview(file) {
 
   canvas.width = viewport.width;
   canvas.height = viewport.height;
+  canvas.style.marginTop = "30px";
   canvas.style.borderRadius = "12px";
   canvas.style.boxShadow = "0 10px 30px rgba(0,0,0,0.15)";
-  canvas.style.marginTop = "20px";
 
   preview.appendChild(canvas);
 
   await page.render({
     canvasContext: ctx,
-    viewport: viewport,
+    viewport,
   }).promise;
 }
+
+// ===== Convert to JPG =====
+convertBtn.addEventListener("click", async () => {
+  if (!selectedFile) return;
+
+  const fileURL = URL.createObjectURL(selectedFile);
+  const pdf = await pdfjsLib.getDocument(fileURL).promise;
+  const page = await pdf.getPage(1);
+
+  const viewport = page.getViewport({ scale: 2 }); // ความคม
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+
+  await page.render({
+    canvasContext: ctx,
+    viewport,
+  }).promise;
+
+  // Convert canvas → JPG
+  const imageData = canvas.toDataURL("image/jpeg", 0.95);
+
+  // Download
+  const link = document.createElement("a");
+  link.href = imageData;
+  link.download = "pdfgo-page-1.jpg";
+  link.click();
+});
