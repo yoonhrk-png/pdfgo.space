@@ -9,7 +9,6 @@
 
   <!-- PDF.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
   <!-- JSZip -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
@@ -39,6 +38,18 @@
         accept="application/pdf"
         hidden
       />
+    </div>
+
+    <!-- Page range -->
+    <div class="options">
+      <input type="number" id="fromPage" min="1" placeholder="From page">
+      <input type="number" id="toPage" min="1" placeholder="To page">
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-wrap">
+      <progress id="progressBar" value="0" max="100"></progress>
+      <p id="progressText"></p>
     </div>
 
     <div id="preview"></div>
