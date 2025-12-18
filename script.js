@@ -12,9 +12,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 // ===== Choose file =====
-chooseBtn.addEventListener("click", () => {
-  fileInput.click();
-});
+chooseBtn.addEventListener("click", () => fileInput.click());
 
 fileInput.addEventListener("change", () => {
   handleFile(fileInput.files[0]);
@@ -49,7 +47,6 @@ function handleFile(file) {
   fileNameText.textContent = file.name;
   convertBtn.disabled = false;
   convertBtn.style.opacity = "1";
-  convertBtn.style.cursor = "pointer";
 
   renderPreview(file);
 }
@@ -58,8 +55,7 @@ function handleFile(file) {
 async function renderPreview(file) {
   preview.innerHTML = "";
 
-  const fileURL = URL.createObjectURL(file);
-  const pdf = await pdfjsLib.getDocument(fileURL).promise;
+  const pdf = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise;
   const page = await pdf.getPage(1);
 
   const viewport = page.getViewport({ scale: 1.2 });
@@ -74,38 +70,50 @@ async function renderPreview(file) {
 
   preview.appendChild(canvas);
 
-  await page.render({
-    canvasContext: ctx,
-    viewport,
-  }).promise;
+  await page.render({ canvasContext: ctx, viewport }).promise;
 }
 
-// ===== Convert to JPG =====
+// ===== Convert ALL pages → ZIP =====
 convertBtn.addEventListener("click", async () => {
   if (!selectedFile) return;
 
-  const fileURL = URL.createObjectURL(selectedFile);
-  const pdf = await pdfjsLib.getDocument(fileURL).promise;
-  const page = await pdf.getPage(1);
+  convertBtn.textContent = "Converting...";
+  convertBtn.disabled = true;
 
-  const viewport = page.getViewport({ scale: 2 }); // ความคม
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
+  const zip = new JSZip();
+  const pdf = await pdfjsLib
+    .getDocument(URL.createObjectURL(selectedFile))
+    .promise;
 
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const viewport = page.getViewport({ scale: 2 });
 
-  await page.render({
-    canvasContext: ctx,
-    viewport,
-  }).promise;
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
 
-  // Convert canvas → JPG
-  const imageData = canvas.toDataURL("image/jpeg", 0.95);
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
 
-  // Download
+    await page.render({
+      canvasContext: ctx,
+      viewport,
+    }).promise;
+
+    const imageData = canvas
+      .toDataURL("image/jpeg", 0.95)
+      .split(",")[1];
+
+    zip.file(`page-${i}.jpg`, imageData, { base64: true });
+  }
+
+  const zipBlob = await zip.generateAsync({ type: "blob" });
+
   const link = document.createElement("a");
-  link.href = imageData;
-  link.download = "pdfgo-page-1.jpg";
+  link.href = URL.createObjectURL(zipBlob);
+  link.download = "pdfgo-images.zip";
   link.click();
+
+  convertBtn.textContent = "Convert to JPG (ZIP)";
+  convertBtn.disabled = false;
 });
