@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <title>PDFGo</title>
+  <title>PDF to JPG – PDFGo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <link rel="stylesheet" href="style.css" />
@@ -14,22 +14,29 @@
 </head>
 <body>
 
+  <!-- Header -->
   <header class="topbar">
     <div class="logo">PDFGo</div>
   </header>
 
+  <!-- Main -->
   <main class="page">
-    <h1 class="title">Convert PDF to JPG</h1>
+    <h1 class="title">PDF to JPG</h1>
+    <p class="subtitle">
+      Convert PDF pages to high-quality JPG images.<br>
+      Files never leave your device.
+    </p>
 
+    <!-- Upload -->
     <div class="upload-box">
       <div class="upload-icon">📄</div>
 
       <button class="choose-btn" id="chooseBtn">
-        Choose files
+        Choose PDF file
       </button>
 
       <p class="drop-text" id="fileName">
-        or drop PDF here
+        or drag & drop PDF here
       </p>
 
       <input
@@ -40,10 +47,17 @@
       />
     </div>
 
-    <!-- Page range -->
+    <!-- Options -->
     <div class="options">
-      <input type="number" id="fromPage" min="1" placeholder="From page">
-      <input type="number" id="toPage" min="1" placeholder="To page">
+      <div class="option-group">
+        <label>From</label>
+        <input type="number" id="fromPage" min="1">
+      </div>
+
+      <div class="option-group">
+        <label>To</label>
+        <input type="number" id="toPage" min="1">
+      </div>
     </div>
 
     <!-- Progress -->
@@ -52,13 +66,21 @@
       <p id="progressText"></p>
     </div>
 
+    <!-- Preview -->
     <div id="preview"></div>
 
+    <!-- Action -->
     <button class="convert-btn" id="convertBtn" disabled>
-      Convert to JPG (ZIP)
+      Convert to JPG
     </button>
+
+    <!-- Trust -->
+    <p class="trust-text">
+      🔒 Secure • ⚡ Fast • 💻 Works in your browser
+    </p>
   </main>
 
+  <!-- Footer -->
   <footer class="footer">
     Files never leave your device • PDFGo
   </footer>
