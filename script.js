@@ -5,7 +5,14 @@ const convertBtn = document.getElementById("convertBtn");
 const uploadBox = document.querySelector(".upload-box");
 const preview = document.getElementById("preview");
 
+const fromInput = document.getElementById("fromPage");
+const toInput = document.getElementById("toPage");
+
+const progressBar = document.getElementById("progressBar");
+const progressText = document.getElementById("progressText");
+
 let selectedFile = null;
+let totalPages = 0;
 
 // PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -35,7 +42,7 @@ uploadBox.addEventListener("drop", (e) => {
 });
 
 // ===== Handle file =====
-function handleFile(file) {
+async function handleFile(file) {
   if (!file) return;
 
   if (file.type !== "application/pdf") {
@@ -45,19 +52,30 @@ function handleFile(file) {
 
   selectedFile = file;
   fileNameText.textContent = file.name;
+
+  const pdf = await pdfjsLib
+    .getDocument(URL.createObjectURL(file))
+    .promise;
+
+  totalPages = pdf.numPages;
+
+  fromInput.value = 1;
+  toInput.value = totalPages;
+
+  progressBar.value = 0;
+  progressText.textContent = "";
+
   convertBtn.disabled = false;
   convertBtn.style.opacity = "1";
 
-  renderPreview(file);
+  renderPreview(pdf);
 }
 
-// ===== Preview page 1 =====
-async function renderPreview(file) {
+// ===== Preview =====
+async function renderPreview(pdf) {
   preview.innerHTML = "";
 
-  const pdf = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise;
   const page = await pdf.getPage(1);
-
   const viewport = page.getViewport({ scale: 1.2 });
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
@@ -73,19 +91,35 @@ async function renderPreview(file) {
   await page.render({ canvasContext: ctx, viewport }).promise;
 }
 
-// ===== Convert ALL pages → ZIP =====
+// ===== Convert with progress =====
 convertBtn.addEventListener("click", async () => {
   if (!selectedFile) return;
 
-  convertBtn.textContent = "Converting...";
+  let from = parseInt(fromInput.value, 10);
+  let to = parseInt(toInput.value, 10);
+
+  if (isNaN(from) || isNaN(to) || from < 1 || to > totalPages || from > to) {
+    alert("ช่วงหน้าที่เลือกไม่ถูกต้อง");
+    return;
+  }
+
   convertBtn.disabled = true;
+  convertBtn.textContent = "Converting...";
 
   const zip = new JSZip();
   const pdf = await pdfjsLib
     .getDocument(URL.createObjectURL(selectedFile))
     .promise;
 
-  for (let i = 1; i <= pdf.numPages; i++) {
+  const total = to - from + 1;
+  let current = 0;
+
+  for (let i = from; i <= to; i++) {
+    current++;
+
+    progressText.textContent = `Converting page ${i} / ${to}`;
+    progressBar.value = Math.round((current / total) * 100);
+
     const page = await pdf.getPage(i);
     const viewport = page.getViewport({ scale: 2 });
 
@@ -95,10 +129,7 @@ convertBtn.addEventListener("click", async () => {
     canvas.width = viewport.width;
     canvas.height = viewport.height;
 
-    await page.render({
-      canvasContext: ctx,
-      viewport,
-    }).promise;
+    await page.render({ canvasContext: ctx, viewport }).promise;
 
     const imageData = canvas
       .toDataURL("image/jpeg", 0.95)
@@ -106,6 +137,9 @@ convertBtn.addEventListener("click", async () => {
 
     zip.file(`page-${i}.jpg`, imageData, { base64: true });
   }
+
+  progressText.textContent = "Creating ZIP...";
+  progressBar.value = 100;
 
   const zipBlob = await zip.generateAsync({ type: "blob" });
 
