@@ -3,13 +3,18 @@ const fileInput = document.getElementById("fileInput");
 const fileNameText = document.getElementById("fileName");
 const convertBtn = document.getElementById("convertBtn");
 const uploadBox = document.querySelector(".upload-box");
+const preview = document.getElementById("preview");
 
-// กดปุ่ม → เปิด file picker
+// PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+// ===== Button choose =====
 chooseBtn.addEventListener("click", () => {
   fileInput.click();
 });
 
-// เมื่อเลือกไฟล์จาก dialog
+// ===== File picker =====
 fileInput.addEventListener("change", () => {
   handleFile(fileInput.files[0]);
 });
@@ -27,12 +32,10 @@ uploadBox.addEventListener("dragleave", () => {
 uploadBox.addEventListener("drop", (e) => {
   e.preventDefault();
   uploadBox.style.opacity = "1";
-
-  const file = e.dataTransfer.files[0];
-  handleFile(file);
+  handleFile(e.dataTransfer.files[0]);
 });
 
-// ===== Common handler =====
+// ===== Handle file =====
 function handleFile(file) {
   if (!file) return;
 
@@ -43,6 +46,34 @@ function handleFile(file) {
 
   fileNameText.textContent = file.name;
   convertBtn.disabled = false;
-  convertBtn.style.cursor = "pointer";
   convertBtn.style.opacity = "1";
+  convertBtn.style.cursor = "pointer";
+
+  renderPreview(file);
+}
+
+// ===== Render PDF preview =====
+async function renderPreview(file) {
+  preview.innerHTML = ""; // clear
+
+  const fileURL = URL.createObjectURL(file);
+  const pdf = await pdfjsLib.getDocument(fileURL).promise;
+  const page = await pdf.getPage(1);
+
+  const viewport = page.getViewport({ scale: 1.2 });
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  canvas.style.borderRadius = "12px";
+  canvas.style.boxShadow = "0 10px 30px rgba(0,0,0,0.15)";
+  canvas.style.marginTop = "20px";
+
+  preview.appendChild(canvas);
+
+  await page.render({
+    canvasContext: ctx,
+    viewport: viewport,
+  }).promise;
 }
