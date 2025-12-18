@@ -5,17 +5,17 @@
   <title>PDFGo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
+
+  <!-- PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
 
-  <!-- Header -->
   <header class="topbar">
     <div class="logo">PDFGo</div>
   </header>
 
-  <!-- Main -->
   <main class="page">
     <h1 class="title">Convert PDF to JPG</h1>
 
@@ -30,7 +30,6 @@
         or drop PDF here
       </p>
 
-      <!-- input file (ซ่อน) -->
       <input
         type="file"
         id="fileInput"
@@ -39,17 +38,18 @@
       />
     </div>
 
+    <!-- 🔍 Preview -->
+    <div id="preview" style="margin: 30px 0;"></div>
+
     <button class="convert-btn" id="convertBtn" disabled>
       Convert to JPG
     </button>
   </main>
 
-  <!-- Footer -->
   <footer class="footer">
     Files never leave your device • PDFGo
   </footer>
 
-  <!-- JS -->
   <script src="script.js"></script>
 </body>
 </html>
